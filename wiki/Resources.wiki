@@ -6,3 +6,8 @@ Other resources with other information about the AirPlay protocol
  * [http://mafipulation.org/blagoblig/2011/04/08#shairport] - Info about the old AirTunes key that can still be used by other AirPlay clients
  * [http://blog.technologeek.org/airtunes-v2] - Another link about AirTunes protocol
  * [http://forum.xbmc.org/archive/index.php/t-80400.html] - An example from xmbc in PHP
+
+
+==Other==
+We should be able to do a Chrome Extension because it supports cross platform, as long as we can sent keep alive:
+http://code.google.com/chrome/extensions/xhr.html
