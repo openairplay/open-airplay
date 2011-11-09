@@ -1,3 +1,4 @@
+#labels Featured
 Other resources with other information about the AirPlay protocol
 
 ==Links==
