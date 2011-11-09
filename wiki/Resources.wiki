@@ -5,3 +5,4 @@ Other resources with other information about the AirPlay protocol
  * [https://github.com/PascalW/Airplayer/issues/21] - A discussion with some info about headers
  * [http://mafipulation.org/blagoblig/2011/04/08#shairport] - Info about the old AirTunes key that can still be used by other AirPlay clients
  * [http://blog.technologeek.org/airtunes-v2] - Another link about AirTunes protocol
+ * [http://forum.xbmc.org/archive/index.php/t-80400.html] - An example from xmbc in PHP
