@@ -12,6 +12,7 @@ More coming soon... contributors welcome. This has come from looking at the sour
 || POST|| /rate?value=0.000000 || Pause video command ||
 || POST|| /scrub?position= || Jump to a position in a video ||
 || GET|| /scrub || Client request current position of a video ||
+|| POST|| /reverse || Sets up a reverse connection that will both send commands to an AppleTV and receive events back ||
 || POST|| /authorize || Authorize iTunes DRM ||
 
 ===Headers===
