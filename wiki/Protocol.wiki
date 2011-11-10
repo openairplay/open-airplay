@@ -3,6 +3,11 @@
 
 More coming soon... contributors welcome. This has come from looking at the source code of [http://code.google.com/p/airstream-media-player/ Airstream Media Player]. I'm not sure if they're implementing pre iOS 4.3 parts that were different to the current implementation. I haven't test it all yet, but will do as I implement more functions. Photos and stop work though :)
 
+===Questions===
+How does the iPad use the slideshow themes that are built on to the AppleTV?
+
+How does AirPlay mirroring work, is it a separate command or just a http video stream?
+
 ===Commands===
 || *HTTP Method* || *URI* || *Description* ||
 || PUT|| /photo || Display a photo ||
@@ -21,8 +26,3 @@ More coming soon... contributors welcome. This has come from looking at the sour
 || Content-Location ||  || The URL for the AppleTV to look up to get the contents of the video from ||
 || Start-Position ||  || The start position for the video ||
 || X-Apple-Transition || None,SlideLeft,SlideRight,Dissolve || Transition to use for when displaying photos ||
-
-===Questions===
-How does the iPad use the slideshow themes that are built on to the AppleTV?
-
-How does AirPlay mirroring work, is it a separate command or just a http video stream?
