@@ -1,4 +1,17 @@
 #summary Documentation on the AirPlay protocol
 #labels Featured
 
-Coming soon!
+More coming soon... contributors welcome
+
+Commands
+||Http Method||URI||Description||
+||PUT||/photo||Display a photo||
+||POST||/stop||Stop AirPlay||
+||POST||/rate?value=1.000000||Play a video||
+||POST||/rate?value=0.000000||Pause a video||
+||POST||/authorize|| Authorize iTunes DRM||
+
+Headers
+||Header||Values||Description||
+||User-Agent||MediaControl/1.0'||The user agent for AirPlay clients||
+||X-Apple-Transition||None,SlideLeft,SlideRight,Dissolve||Transition to use for when displaying photos||
