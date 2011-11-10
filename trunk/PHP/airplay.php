@@ -19,23 +19,26 @@ class AirPlay {
 	}
 	function getHttp() {
 		if ($this->http == null) {
-			$this->http = new HTTPRequest('http://'.$this->hostname.':'.$this->port,1000,true);
+			$this->http = new HTTPRequest('http://'.$this->hostname.':'.$this->port,true,10000);
 		}
 		return $this->http;
 	}
 	function stop() {
 		$http = $this->getHttp();
-		$http->SetUrl('http://'.$this->hostname.':'.$this->port.'/stop');
+		$http->SetUri('/stop');
 		$http->Post('');
 		$http->Close();
 		$this->http = null;
 	}
-	function image($image) {
+	function image($image, $transition = AirPlay::NONE) {
 		$http = $this->getHttp();
-		$http->SetUrl('http://'.$this->hostname.':'.$this->port.'/photo');
+		$headers = array();
+		$headers['User-Agent'] = 'MediaControl/1.0';
+		$headers['X-Apple-Transition'] = $transition;
+		$http->SetUri('/photo');
 		$http->Put($image);
 	}
-	function imageFile($file) {
+	function imageFile($file, $transition = AirPlay::NONE) {
 		$this->image(file_get_contents($file));
 	}
 }
@@ -106,7 +109,7 @@ if (PHP_SAPI === 'cli') {
 		}
 	}
 	function usage() {
-		echo "commands: -s {stop} -i file {image}\n";
+		echo "commands: -s {stop} | -i file {image}\n | -d {desktop (mac only)}";
 		echo "php ".$GLOBALS['argv'][0]." -h {hostname} [-p {port}] command\n";
 	}
 	function waitforuser() {
@@ -130,6 +133,14 @@ if (PHP_SAPI === 'cli') {
 		} elseif (($file = $args->flag('i'))) {
 			$airplay->imageFile($file);
 			waitforuser();
+		} elseif ($args->flag('d')) {
+			//TODO: Could eventually do this on Linux using http://freecode.com/projects/scrot
+			echo 'Press ctrl-c to quit';
+			while (true) {
+				exec('screencapture -m -x -C -t jpg /tmp/airplay.jpg');
+				$airplay->imageFile('/tmp/airplay.jpg');
+				exec('rm /tmp/airplay.jpg');
+			}
 		} else {
 			usage();
 		}

@@ -76,6 +76,10 @@ class HTTPRequest {
 		}
 	}
 	
+	function SetUri($uri) {
+		$this->uri = $uri;
+	}
+	
 	//Encode a value in the header
 	function HeaderEncode($header, $value) {
 		$crlf = "\r\n";
