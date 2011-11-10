@@ -1,5 +1,5 @@
+#summary Other resources with other information about the AirPlay protocol
 #labels Featured
-Other resources with other information about the AirPlay protocol
 
 ==Links==
  * [https://github.com/PascalW/Airplayer/issues/21] - A discussion with some info about headers
