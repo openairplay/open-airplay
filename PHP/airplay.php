@@ -30,7 +30,7 @@ class AirPlay {
 		$http->Close();
 		$this->http = null;
 	}
-	function image($image, $transition = AirPlay::NONE) {
+	function photo($image, $transition = AirPlay::NONE) {
 		$http = $this->getHttp();
 		$headers = array();
 		$headers['User-Agent'] = 'MediaControl/1.0';
@@ -38,8 +38,8 @@ class AirPlay {
 		$http->SetUri('/photo');
 		$http->Put($image);
 	}
-	function imageFile($file, $transition = AirPlay::NONE) {
-		$this->image(file_get_contents($file));
+	function photoFile($file, $transition = AirPlay::NONE) {
+		$this->photo(file_get_contents($file));
 	}
 }
 
@@ -131,14 +131,14 @@ if (PHP_SAPI === 'cli') {
 		if ($args->flag('s')) {
 			$airplay->stop();
 		} elseif (($file = $args->flag('i'))) {
-			$airplay->imageFile($file);
+			$airplay->photoFile($file);
 			waitforuser();
 		} elseif ($args->flag('d')) {
 			//TODO: Could eventually do this on Linux using http://freecode.com/projects/scrot
 			echo 'Press ctrl-c to quit';
 			while (true) {
 				exec('screencapture -m -x -C -t jpg /tmp/airplay.jpg');
-				$airplay->imageFile('/tmp/airplay.jpg');
+				$airplay->photoFile('/tmp/airplay.jpg');
 				exec('rm /tmp/airplay.jpg');
 			}
 		} else {
