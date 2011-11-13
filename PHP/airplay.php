@@ -109,8 +109,8 @@ if (PHP_SAPI === 'cli') {
 		}
 	}
 	function usage() {
-		echo "commands: -s {stop} | -i file {image}\n | -d {desktop (mac only)}";
-		echo "php ".$GLOBALS['argv'][0]." -h {hostname} [-p {port}] command\n";
+		echo "commands: -s {stop} | -p file {photo} | -d {desktop (mac only)}\n";
+		echo "php ".$GLOBALS['argv'][0]." -h hostname[:port] command\n";
 	}
 	function waitforuser() {
 		echo 'Press return to quit';
@@ -122,15 +122,15 @@ if (PHP_SAPI === 'cli') {
 		usage();
 		exit(1);
 	} else {
-		$port = $args->flag('p');
-		if ($port) {
-			$airplay = new AirPlay($host,$port);
+		$host =  split(':',$host);
+		if (count($host) > 1) {
+			$airplay = new AirPlay($host[0],$host[1]);
 		} else {
-			$airplay = new AirPlay($host);
+			$airplay = new AirPlay($host[0]);
 		}
 		if ($args->flag('s')) {
 			$airplay->stop();
-		} elseif (($file = $args->flag('i'))) {
+		} elseif (($file = $args->flag('p'))) {
 			$airplay->photoFile($file);
 			waitforuser();
 		} elseif ($args->flag('d')) {
