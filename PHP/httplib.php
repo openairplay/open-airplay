@@ -235,9 +235,13 @@ class HTTPRequest {
 		
 		//Redirection?
 		if(isset($headers['location'])) {
+			//TODO: eventually handle keep alive here too
 			$http = new HTTPRequest($headers['location']);
 			return $http->Request($req, $details);
 		} else {
+			if (strtolower($headers['transfer-encoding']) == 'chunked') {
+				$body = $this->unchunkHttp11($body);
+			}
 			if ($details) {
 				$result[HTTPRequest::HTTP] = $code;
 				$result[HTTPRequest::HEADER] = $headers;
@@ -247,6 +251,20 @@ class HTTPRequest {
 				return $body;
 			}
 		}
+	}
+	
+	function unchunkHttp11($data) {
+		$fp = 0;
+		$outData = "";
+		while ($fp < strlen($data)) {
+			$rawnum = substr($data, $fp, strpos(substr($data, $fp), "\r\n") + 2);
+			$num = hexdec(trim($rawnum));
+			$fp += strlen($rawnum);
+			$chunk = substr($data, $fp, $num);
+			$outData .= $chunk;
+			$fp += strlen($chunk);
+		}
+		return $outData;
 	}
 	
 	//Download URL to string, included for backwards compatibilty with versions that did have seperate GET/POST
