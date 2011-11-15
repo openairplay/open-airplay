@@ -189,11 +189,17 @@ public class AirPlay {
 	// Command line functions
 	public static void usage() {
 		System.out.println("commands: -s {stop} | -p file {photo} | -d {desktop}");
-		System.out.println("java -jar AirPlay.jar -h hostname[:port] command");
+		System.out.println("java -jar airplay.jar -h hostname[:port] command");
 	}
 	public static void waitforuser() {
 		System.out.println("Press return to quit");
-		//TODO: read from standard in
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		String s;
+		try {
+			while ((s = in.readLine()) != null) { }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	public static void main(String[] args) {
 		try {
@@ -208,14 +214,14 @@ public class AirPlay {
 			if (hostname == null) {
 				usage();
 			} else {
-				AirPlay airplay = null;
+				AirPlay airplay;
 				String[] hostport = hostname.split(":",2);
 				if (hostport.length > 1) {
 					airplay = new AirPlay(hostport[0],Integer.parseInt(hostport[1]));
 				} else {
 					airplay = new AirPlay(hostport[0]);
 				}
-				String photo = null;
+				String photo;
 				if (cmd.getOptionValue(stopopt) != null) {
 					airplay.stop();
 				} else if ((photo = (String) cmd.getOptionValue(photoopt)) != null) {
