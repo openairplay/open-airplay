@@ -189,7 +189,7 @@ public class AirPlay {
 	// Command line functions
 	public static void usage() {
 		System.out.println("commands: -s {stop} | -p file {photo} | -d {desktop}");
-		System.out.println("java AirPlay -h hostname[:port] command");
+		System.out.println("java -jar AirPlay.jar -h hostname[:port] command");
 	}
 	public static void waitforuser() {
 		System.out.println("Press return to quit");
