@@ -74,7 +74,7 @@ public class AirPlay {
 		return doHTTP(method, uri, os, null);
 	}
 	protected String doHTTP(String method, String uri, ByteArrayOutputStream os, Map headers) throws IOException {
-		//TODO: Need to make sure this keeps alive
+		//TODO: Need to make sure this keeps alive as long as possible, may need to keep sending photo
 		URL url = null;
 		try {
 			url = new URL("http://"+hostname+":"+port+uri);
@@ -196,7 +196,7 @@ public class AirPlay {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String s;
 		try {
-			while ((s = in.readLine()) != null) { }
+			while ((s = in.readLine()) != null && !(s.length() >= 0)) { }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
