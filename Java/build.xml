@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AirPlay" default="jar" basedir=".">
+	<property name="bin" location="bin"/>
+	<property name="build" location="build"/>
+	<property name="src" location="src"/>
+	<property name="lib" location="lib"/>
+	<property name="jar" location="${build}/airplay.jar"/>
+	
+	<fileset id="lib.jars" dir="${lib}">
+		<include name="**/*.jar"/>
+	</fileset>
+	<path id="lib.path">
+		<fileset refid="lib.jars"/>
+	</path>
+	
+	<target name="prepare" description="Create build dirs">
+		<mkdir dir="${bin}"/>
+		<mkdir dir="${build}"/>
+	</target>
+	
+	<target name="build" depends="prepare" description="Compile">
+		<javac srcdir="${src}" destdir="${bin}"
+			source="1.5" target="1.5"
+			failonerror="true"
+			includes="**/*.java"
+			classpathref="lib.path"/>
+	</target>
+	
+	<target name="jar" depends="build" description="Create jar">
+		<jar jarfile="${jar}">
+			<fileset dir="${bin}" includes="**/*.class"/>
+			<manifest>
+				<attribute name="Main-Class" value="com.jameslow.AirPlay"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="run" depends="jar" description="Run jar">
+		<java jar="${jar}"
+			dir="${bin}"
+			fork="yes"
+			classpathref="lib.path"/>
+	</target>
+</project>
