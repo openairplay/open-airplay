@@ -8,6 +8,7 @@ import java.util.*;
 import javax.imageio.*;
 import javax.jmdns.*;
 import javax.swing.*;
+import jargs.gnu.*;
 
 public class AirPlay {
 	public static final String DNSSD_TYPE = "_airplay._tcp.local.";
@@ -16,31 +17,51 @@ public class AirPlay {
 	public static final String SLIDE_LEFT = "SlideLeft";
 	public static final String SLIDE_RIGHT = "SlideRight";
 	public static final String DISSOLVE = "Dissolve";
+	public static final int PORT = 7000;
 	
 	protected String hostname;
 	protected int port;
 	protected Thread screenthread;
 
-	protected static AirPlayService[] formatSearch(ServiceInfo[] services) throws IOException {
-		AirPlayService[] results = new AirPlayService[services.length];
+	public static class Service {
+		public String name;
+		public String hostname;
+		public int port;
+		
+		public Service(String hostname) {
+			this(hostname,PORT);
+		}
+		public Service(String hostname, int port) {
+			this(hostname,port,hostname);
+		}
+		
+		public Service(String hostname, int port, String name) {
+			this.hostname = hostname;
+			this.port = port;
+			this.name = name;
+		}
+	}
+
+	protected static Service[] formatSearch(ServiceInfo[] services) throws IOException {
+		Service[] results = new Service[services.length];
 		for (int i = 0; i < services.length; i++) {
 			ServiceInfo service = services[i];
 			Inet4Address[] addresses = service.getInet4Addresses();
-			results[i] = new AirPlayService(addresses[0].getHostAddress(), service.getPort(), service.getName());
+			results[i] = new Service(addresses[0].getHostAddress(), service.getPort(), service.getName());
 		}
 		return results;
 	}
-	public static AirPlayService[] search() throws IOException {
+	public static Service[] search() throws IOException {
 		return search(6000);
 	}
-	public static AirPlayService[] search(int timeout) throws IOException {
+	public static Service[] search(int timeout) throws IOException {
 		final JmDNS jmdns = JmDNS.create();
-		AirPlayService[] results = formatSearch(jmdns.list(DNSSD_TYPE, timeout));
+		Service[] results = formatSearch(jmdns.list(DNSSD_TYPE, timeout));
 		jmdns.close();
 		return results;
 	}
 	public AirPlay(String hostname) {
-		this(hostname,7000);
+		this(hostname,PORT);
 	}
 	public AirPlay(String hostname, int port) {
 		this.hostname = hostname;
@@ -153,7 +174,6 @@ public class AirPlay {
 			}
 		}
 	}
-	
 	public void stopScreen() {
 		if (screenthread != null) {
 			screenthread.interrupt();
@@ -166,9 +186,48 @@ public class AirPlay {
 		screenthread.start();
 	}
 	
+	// Command line functions
+	public static void usage() {
+		System.out.println("commands: -s {stop} | -p file {photo} | -d {desktop}");
+		System.out.println("java AirPlay -h hostname[:port] command");
+	}
+	public static void waitforuser() {
+		System.out.println("Press return to quit");
+		//TODO: read from standard in
+	}
 	public static void main(String[] args) {
 		try {
+			CmdLineParser cmd = new CmdLineParser();
+			CmdLineParser.Option hostopt = cmd.addStringOption('h',"hostname");
+			CmdLineParser.Option stopopt = cmd.addBooleanOption('s',"stop");
+			CmdLineParser.Option photoopt = cmd.addStringOption('p',"photo");
+			CmdLineParser.Option desktopopt = cmd.addBooleanOption('d',"desktop");
+			cmd.parse(args);
+			String hostname = (String) cmd.getOptionValue(hostopt);
 			
+			if (hostname == null) {
+				usage();
+			} else {
+				AirPlay airplay = null;
+				String[] hostport = hostname.split(":",2);
+				if (hostport.length > 1) {
+					airplay = new AirPlay(hostport[0],Integer.parseInt(hostport[1]));
+				} else {
+					airplay = new AirPlay(hostport[0]);
+				}
+				String photo = null;
+				if (cmd.getOptionValue(stopopt) != null) {
+					airplay.stop();
+				} else if ((photo = (String) cmd.getOptionValue(photoopt)) != null) {
+					airplay.photo(photo);
+					waitforuser();
+				} else if (cmd.getOptionValue(desktopopt) != null) {
+					System.out.println("Press ctrl-c to quit");
+					airplay.screen();
+				} else {
+					usage();
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
