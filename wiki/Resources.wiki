@@ -7,6 +7,7 @@
  * [http://blog.technologeek.org/airtunes-v2] - Another link about AirTunes protocol
  * [http://forum.xbmc.org/archive/index.php/t-80400.html] - An example from xmbc in PHP
  * [http://jmdns.sourceforge.net/apidocs/index.html] - JmDNS is a pure Java Bonjour/DNS-SD implementation
+ * [http://home.heeere.com/tech-androidjmdns.html] - Info about geting JmDNS working on Android
 
 
 ==Other==
