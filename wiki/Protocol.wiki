@@ -26,3 +26,6 @@ How does AirPlay mirroring work, is it a separate command or just a http video s
 || Content-Location ||  || The URL for the AppleTV to look up to get the contents of the video from ||
 || Start-Position ||  || The start position for the video ||
 || X-Apple-Transition || None,SlideLeft,SlideRight,Dissolve || Transition to use for when displaying photos ||
+
+===Other===
+AppleTV advertises a Bonjour (DNS-SD) service as "_airplay._tcp.local."
