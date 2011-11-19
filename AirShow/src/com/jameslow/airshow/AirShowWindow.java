@@ -65,7 +65,7 @@ public class AirShowWindow extends MainWindow implements ActionListener {
 		if (type.getSelectedIndex() == 0) {
 			airplay = new AirPlay("Apple-TV.local");
 			try {
-				airplay.screen();
+				airplay.desktop();
 			} catch (Exception e) {
 				error(e);
 			}
