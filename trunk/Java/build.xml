@@ -41,4 +41,8 @@
 			fork="yes"
 			classpathref="lib.path"/>
 	</target>
+	
+	<target name="airshow" depends="jar" description="Copy jar to AirShow">
+		<copy file="${jar}" todir="../AirShow/lib"/>
+	</target>
 </project>

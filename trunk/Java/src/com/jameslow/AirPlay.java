@@ -21,45 +21,9 @@ public class AirPlay {
 	
 	protected String hostname;
 	protected int port;
-	protected Thread screenthread;
-
-	public static class Service {
-		public String name;
-		public String hostname;
-		public int port;
-		
-		public Service(String hostname) {
-			this(hostname,PORT);
-		}
-		public Service(String hostname, int port) {
-			this(hostname,port,hostname);
-		}
-		
-		public Service(String hostname, int port, String name) {
-			this.hostname = hostname;
-			this.port = port;
-			this.name = name;
-		}
-	}
-
-	protected static Service[] formatSearch(ServiceInfo[] services) throws IOException {
-		Service[] results = new Service[services.length];
-		for (int i = 0; i < services.length; i++) {
-			ServiceInfo service = services[i];
-			Inet4Address[] addresses = service.getInet4Addresses();
-			results[i] = new Service(addresses[0].getHostAddress(), service.getPort(), service.getName());
-		}
-		return results;
-	}
-	public static Service[] search() throws IOException {
-		return search(6000);
-	}
-	public static Service[] search(int timeout) throws IOException {
-		final JmDNS jmdns = JmDNS.create();
-		Service[] results = formatSearch(jmdns.list(DNSSD_TYPE, timeout));
-		jmdns.close();
-		return results;
-	}
+	protected PhotoThread photothread;
+	
+	//AirPlay class
 	public AirPlay(String hostname) {
 		this(hostname,PORT);
 	}
@@ -118,7 +82,7 @@ public class AirPlay {
 	}
 	public void stop() {
 		try {
-			stopScreen();
+			stopPhotoThread();
 			doHTTP("POST", "/stop");
 		} catch (Exception e) { }
 	}
@@ -139,6 +103,12 @@ public class AirPlay {
 		this.photo(image,NONE);
 	}
 	public void photo(BufferedImage image, String transition) throws IOException {
+		stopPhotoThread();
+		photoRaw(image,transition);
+		photothread = new PhotoThread(this,image,5000);
+		photothread.start();
+	}
+	public void photoRaw(BufferedImage image, String transition) throws IOException {
 		Map headers = new HashMap();
 		headers.put("X-Apple-Transition",transition);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -159,31 +129,83 @@ public class AirPlay {
 		return image;
 	}
 	
-	public class ScreenThread extends Thread {
-		final AirPlay airplay;
-		public ScreenThread(AirPlay airplay) {
+	public class PhotoThread extends Thread {
+		private final AirPlay airplay;
+		private BufferedImage image = null;
+		private int timeout = 5000;
+		
+		public PhotoThread(AirPlay airplay) {
+			this(airplay,null,1000);
+		}
+		public PhotoThread(AirPlay airplay, BufferedImage image, int timeout) {
 			this.airplay = airplay;
+			this.image = image;
+			this.timeout = timeout;
 		}
 		public void run() {
 			while (!Thread.interrupted()) {
 				try {
-					airplay.photo(AirPlay.captureScreen());
+					if (image == null) {
+						airplay.photoRaw(AirPlay.captureScreen(),NONE);
+					} else {
+						airplay.photoRaw(image,NONE);
+						Thread.sleep(Math.round(0.9*timeout));
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
 	}
-	public void stopScreen() {
-		if (screenthread != null) {
-			screenthread.interrupt();
-			screenthread = null;
+	public void stopPhotoThread() {
+		if (photothread != null) {
+			photothread.interrupt();
+			while (photothread.isAlive());
+			photothread = null;
 		}
 	}
 	public void screen() throws AWTException, IOException {
-		stopScreen();
-		screenthread = new ScreenThread(this);
-		screenthread.start();
+		stopPhotoThread();
+		photothread = new PhotoThread(this);
+		photothread.start();
+	}
+	
+	//Bonjour classes
+	public static class Service {
+		public String name;
+		public String hostname;
+		public int port;
+		
+		public Service(String hostname) {
+			this(hostname,PORT);
+		}
+		public Service(String hostname, int port) {
+			this(hostname,port,hostname);
+		}
+		
+		public Service(String hostname, int port, String name) {
+			this.hostname = hostname;
+			this.port = port;
+			this.name = name;
+		}
+	}
+	protected static Service[] formatSearch(ServiceInfo[] services) throws IOException {
+		Service[] results = new Service[services.length];
+		for (int i = 0; i < services.length; i++) {
+			ServiceInfo service = services[i];
+			Inet4Address[] addresses = service.getInet4Addresses();
+			results[i] = new Service(addresses[0].getHostAddress(), service.getPort(), service.getName());
+		}
+		return results;
+	}
+	public static Service[] search() throws IOException {
+		return search(6000);
+	}
+	public static Service[] search(int timeout) throws IOException {
+		final JmDNS jmdns = JmDNS.create();
+		Service[] results = formatSearch(jmdns.list(DNSSD_TYPE, timeout));
+		jmdns.close();
+		return results;
 	}
 	
 	// Command line functions
@@ -225,8 +247,8 @@ public class AirPlay {
 				if (cmd.getOptionValue(stopopt) != null) {
 					airplay.stop();
 				} else if ((photo = (String) cmd.getOptionValue(photoopt)) != null) {
+					System.out.println("Press ctrl-c to quit");
 					airplay.photo(photo);
-					waitforuser();
 				} else if (cmd.getOptionValue(desktopopt) != null) {
 					System.out.println("Press ctrl-c to quit");
 					airplay.screen();
