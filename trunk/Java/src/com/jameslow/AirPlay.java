@@ -164,7 +164,7 @@ public class AirPlay {
 			photothread = null;
 		}
 	}
-	public void screen() throws AWTException, IOException {
+	public void desktop() throws AWTException, IOException {
 		stopPhotoThread();
 		photothread = new PhotoThread(this);
 		photothread.start();
@@ -251,7 +251,7 @@ public class AirPlay {
 					airplay.photo(photo);
 				} else if (cmd.getOptionValue(desktopopt) != null) {
 					System.out.println("Press ctrl-c to quit");
-					airplay.screen();
+					airplay.desktop();
 				} else {
 					usage();
 				}
