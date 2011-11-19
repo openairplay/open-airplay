@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Limegreen" default="build" basedir=".">
+	<property name="props" value="build.properties"/>
+	<property name="secret" value="secret.properties"/>
+	<property name="secret.example" value="secret.example.properties"/>
+	<property name="secret.temp" value="secret.temp.properties"/>
+	<property file="${props}"/>
+	<property name="name" value="${application.name}"/>
+	<!-- Preexisitng Directories -->
+	<property name="src" location="src"/>
+	<property name="lib" location="lib"/>
+	<property name="tools" location="tools"/>
+		<property name="antlib" location="${tools}/antlib"/>
+		<property name="manifest" location="${tools}/manifest"/>
+			<property name="main.manifest" value="main-MANIFEST.MF"/>
+			<property name="include.manifest" value="include-MANIFEST.MF"/>
+			<property name="onejar.manifest" value="onejar-MANIFEST.MF"/>
+		<property name="onejar" location="${tools}/onejar"/>
+		<property name="autoupdate" location="${tools}/autoupdate"/>
+			<property name="atomfile" value="${name}.xml"/>
+			<property name="atompath" location="${atomfile}"/>
+		<property name="jarbundler" location="${tools}/jarbundler"/>
+		<property name="jsmooth" location="${tools}/jsmooth"/>
+			<property name="jsmooth.edit" location="${jsmooth}/editor"/>
+			<property name="jsmooth.infile" location="${jsmooth}/ant.jsmooth"/>
+		<property name="applejava" location="${tools}/applejava"/>
+		<property name="google" location="${tools}/google"/>
+	<!-- Output Directories -->
+	<property name="build" location="build"/>
+		<property name="misc" location="${build}/misc"/>
+		<property name="bin" location="${build}/bin"/>
+		<property name="dist" location="${build}/dist"/>
+			<property name="jarfile" location="${dist}/${name}.jar"/>
+			<property name="jarfile.temp" location="${misc}/${name}.jar"/>
+			<property name="appfile" location="${dist}/${name}.app"/>
+			<property name="exefile" location="${dist}/${name}.exe"/>
+			<property name="jsmooth.outfile" location="${dist}/${name}.jsmooth"/>
+		<property name="jar" location="${build}/jar"/>
+			<property name="jar.main" location="${jar}/main"/>
+			<property name="jar.lib" location="${jar}/lib"/>
+			<property name="jarfile.main" location="${jar.main}/main.jar"/>
+		<property name="app" location="${build}/app"/>
+			<property name="new.stub" location="${app}/${name}"/>
+		<property name="exe" location="${build}/exe"/>
+
+	<available file="${secret}" property="secret.present"/>
+	<condition property="copy.do">
+		<isfalse value="${secret.present}"/>
+	</condition>
+	<condition property="copy.dont">
+		<istrue value="${secret.present}"/>
+	</condition>
+
+	<fileset id="jar.jars" dir="${jarbundler}">
+		<include name="**/*.jar"/>
+	</fileset>
+	<path id="jar.path">
+		<fileset refid="jar.jars"/>
+	</path>
+	<taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpathref="jar.path"/>
+	<fileset id="jsmooth.jars" dir="${jsmooth}">
+		<include name="**/*.jar"/>
+	</fileset>
+	<path id="jsmooth.path">
+		<fileset refid="jsmooth.jars"/>
+	</path>
+	<taskdef name="jsmoothgen" classname="net.charabia.jsmoothgen.ant.JSmoothGen" classpathref="jsmooth.path"/>
+	<fileset id="google.jars" dir="${google}">
+		<include name="**/*.jar"/>
+	</fileset>
+	<path id="google.path">
+		<fileset refid="google.jars"/>
+	</path>
+	<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" classpathref="google.path" name="gcupload"/>
+	<taskdef classname="com.jameslow.update.Generator" classpath="${autoupdate}" name="autoupdate"/>
+	<fileset id="ant.jars" dir="${antlib}">
+		<include name="**/*.jar"/>
+	</fileset>
+	<path id="ant.path">
+		<fileset refid="ant.jars"/>
+	</path>
+	<taskdef name="ftp" classname="org.apache.tools.ant.taskdefs.optional.net.FTP" classpathref="ant.path"/>
+
+	<fileset id="antlib.jars" dir="${antlib}">
+		<include name="**/*.jar"/>
+	</fileset>
+	<path id="antlib.id">
+		<fileset refid="antlib.jars"/>
+	</path>
+	<pathconvert property="antlib.classpath" pathsep=";">
+		<path refid="antlib.id"/>
+	</pathconvert>
+	<!-- <taskdef classname="org.apache.tools.ant.taskdefs.optional.ssh.Scp" classpath="${antlib.classpath}" name="scp"/> -->
+	<taskdef classname="com.jameslow.Substring" classpath="${antlib}" name="substring"/>
+
+	<condition property="onejar.do">
+		<istrue value="${onejar.use}"/>
+	</condition>
+	<condition property="include.do">
+		<isfalse value="${onejar.use}"/>
+	</condition>
+	<condition property="version.do">
+		<istrue value="${build.doversion}"/>
+	</condition>
+	<condition property="version.default">
+		<isfalse value="${build.doversion}"/>
+	</condition>
+	<condition property="mainclass" value="com.simontuffs.onejar.Boot">
+		<istrue value="${onejar.use}"/>
+	</condition>
+	<condition property="mainclass" value="${main.class}">
+		<isfalse value="${onejar.use}"/>
+	</condition>
+	<condition property="appbaseuse" value="${autoupdate.applinkbase}">
+		<isfalse value="${autoupdate.usegoogle}"/>
+	</condition>
+	<condition property="appbaseuse" value="http://${google.project}.googlecode.com/files">
+		<istrue value="${autoupdate.usegoogle}"/>
+	</condition>
+	<condition property="autoupdate.do">
+		<istrue value="${autoupdate.enable}"/>
+	</condition>
+	<condition property="google.autoupdate">
+		<and>
+			<istrue value="${autoupdate.usegoogle}"/>
+			<istrue value="${autoupdate.enable}"/>
+		</and>
+	</condition>
+	<condition property="ftp.autoupdate">
+		<and>
+			<isfalse value="${autoupdate.usegoogle}"/>
+			<istrue value="${autoupdate.enable}"/>
+		</and>
+	</condition>
+	<condition property="ftp.dosource">
+		<istrue value="${ftp.source}"/>
+	</condition>
+	<condition property="is.mac">
+		<os family="mac"/>
+	</condition>
+	<condition property="not.mac">
+		<not>
+			<os family="mac"/>
+		</not>
+	</condition>
+	<condition property="is.windows">
+		<os family="windows"/>
+	</condition>
+	<condition property="is.unix">
+		<and>
+			<os family="unix"/>
+			<not><os family="mac"/></not>
+		</and>
+	</condition>
+	<condition property="is.other">
+		<and>
+			<not><os family="mac"/></not>
+			<not><os family="unix"/></not>
+			<not><os family="windows"/></not>
+		</and>
+	</condition>
+
+	<fileset id="lib.jars" dir="${lib}">
+		<include name="**/*.jar"/>
+	</fileset>
+	<path id="lib.path">
+		<fileset refid="lib.jars"/>
+		<pathelement path="${applejava}/AppleJavaExtensions.jar"/>
+		<pathelement path="${jsmooth}/jnismooth.jar"/>
+	</path>
+	
+	<target name="secret.copy" description="Copy secret file if it doesn't exist" if="copy.do">
+		<copy file="${secret.example}" tofile="${secret}" overwrite="false"/>
+	</target>
+	<target name="secret" depends="secret.copy" description="Source the secret file">
+		<property file="${secret}"/>
+	</target>
+	
+	<target name="compile.onejar" description="Compile onejar">
+		<javac srcdir="${onejar}" destdir="${onejar}"
+			source="1.4" target="1.4"
+			failonerror="true"
+			includes="**/*.java">
+		</javac>
+	</target>
+	
+	<target name="compile.autoupdate" description="Compile autoupdate">
+		<javac srcdir="${autoupdate}" destdir="${autoupdate}"
+			source="1.4" target="1.4"
+			failonerror="true"
+			includes="**/*.java">
+		</javac>
+	</target>
+	
+	<target name="compile.utils" description="Compile additional ant utils">
+		<javac srcdir="${antlib}" destdir="${antlib}"
+			source="1.4" target="1.4"
+			failonerror="true"
+			includes="**/*.java">
+		</javac>
+	</target>
+	
+	<target name="prepare" depends="secret" description="Create build dirs">
+		<mkdir dir="${build}"/>
+			<mkdir dir="${bin}"/>
+			<mkdir dir="${dist}"/>
+			<mkdir dir="${jar}"/>
+				<mkdir dir="${jar.main}"/>
+				<mkdir dir="${jar.lib}"/>
+			<mkdir dir="${app}"/>
+			<mkdir dir="${exe}"/>
+			<mkdir dir="${misc}"/>
+	</target>
+	
+	<target name="version.input" depends="prepare" if="version.do">
+		<input
+			message="Please input a new version. Current version ${build.version}"
+			addproperty="new.version"
+		 />
+		<propertyfile file="${props}">
+			<entry key="build.version" value="${new.version}"/>
+		</propertyfile>
+		<condition property="version.default">
+			<equals arg1="${new.doversion}" arg2=""/>
+		</condition>
+	</target>
+	<target name="version.default">
+		<property name="new.version" value="${build.version}"/>
+	</target>
+	<target name="version" depends="version.input" description="Prompt user to enter new version">
+		<!-- At the moment version requires nothing else -->
+	</target>
+	
+	<target name="create.jsmooth" depends="prepare" description="Create JSmooth config file">
+		<copy file="${application.win.icon}" todir="${dist}"/>
+		<copy file="${jsmooth.infile}" tofile="${jsmooth.outfile}"/>
+		<replace file="${jsmooth.outfile}" token="@icofile@" value="${application.win.icon}"/>
+		<replace file="${jsmooth.outfile}" token="@exefile@" value="${name}.exe"/>
+		<replace file="${jsmooth.outfile}" token="@jarfile@" value="${name}.jar"/>
+		<replace file="${jsmooth.outfile}" token="@mainclass@" value="${mainclass}"/>
+		<replace file="${jsmooth.outfile}" token="@exewrapper@" value="${build.exewrapper}"/>
+		<replace file="${jsmooth.outfile}" token="@javaminversion@" value="${build.jvm}"/>
+		<replace file="${jsmooth.outfile}" token="@initheapmemory@" value="${jsmooth.initheap}"/>
+		<replace file="${jsmooth.outfile}" token="@maxheapmemory@" value="${jsmooth.maxheap}"/>
+	</target>
+	
+	<target name="compile" depends="prepare,version.default" description="Compile code">
+		<javac srcdir="${src}" destdir="${bin}"
+			source="${build.jvm}" target="${build.jvm}"
+			failonerror="true"
+			includes="**/*.*"
+			classpathref="lib.path">
+		</javac>
+		<propertyfile file="${props}">
+			<entry key="build.date" type="date" value="now"/>
+		</propertyfile>
+		<buildnumber file="${props}"/>
+		<copy todir="${bin}">
+			<fileset dir="${src}">
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+		<copy file="${props}" todir="${bin}"/>
+		<copy file="${manifest}/${main.manifest}" todir="${misc}"/>
+		<copy file="${manifest}/${include.manifest}" todir="${misc}"/>
+		<copy file="${manifest}/${onejar.manifest}" todir="${misc}"/>
+		<manifest file="${misc}/${main.manifest}">
+			<attribute name="Manifest-Version" value="1.0"/>
+			<attribute name="Main-Class" value="${main.class}"/>
+		</manifest>
+	</target>
+			
+	<target name="jar.onejar" depends="compile" if="onejar.do">
+		<echo message="Placing library jars witin main jar, onejar.use=${onejar.use}."/>
+		<copy todir="${jar.lib}">
+			<fileset dir="${lib}"/>
+		</copy>
+		<!--
+		<manifestclasspath property="jar.classpath" jarfile="${jarfile.main}">
+			<classpath refid="lib.path"/>
+		</manifestclasspath>
+			<attribute name="Class-Path" value="${jar.classpath}" />
+		-->
+		<jar jarfile="${jarfile.main}" basedir="${bin}" manifest="${misc}/${main.manifest}">
+		</jar>
+		<jar jarfile="${jarfile}" manifest="${misc}/${onejar.manifest}">
+			<fileset dir="${jar}"/>
+			<fileset dir="${onejar}" includes="**/*.class"/>
+		</jar>
+	</target>
+	<target name="jar.include" depends="compile" if="include.do">
+		<echo message="Extracting and including library jars in main jar, onejar.use=${onejar.use}."/>
+		<jar jarfile="${jarfile.temp}" basedir="${bin}" manifest="${misc}/${main.manifest}">
+			<!-- Merge library jars into final jar file -->
+			<zipgroupfileset refid="lib.jars"/>
+		</jar>
+		<!-- remove possible signature files from library jars https://issues.apache.org/bugzilla/show_bug.cgi?id=34403 -->
+		<zip destfile="${jarfile}">
+			<zipfileset src="${jarfile.temp}" excludes="META-INF/*.RSA, META-INF/*.DSA, META-INF/*.SF" />
+		</zip>
+	</target>
+
+	<target name="jar" depends="jar.onejar,jar.include" description="Build jar">
+		<!-- At the moment jar requires nothing else -->
+	</target>
+	<target name="exe" depends="jar,create.jsmooth" description="Build exe">
+		<jsmoothgen project="${jsmooth.outfile}" skeletonroot="${jsmooth}/skeletons"/>
+	</target>
+	<target name="exe.run" depends="exe" if="is.windows">
+		<exec dir="${dist}" executable="${dist}/${name}.exe"/>
+	</target>
+	<target name="app.other" depends="jar" if="not.mac">
+		<copy file="${jarbundler}/JavaApplicationStub" tofile="${new.stub}"/>
+	</target>
+	<target name="app" depends="app.other" description="Build app">
+		<jarbundler
+			name="${name}"
+			shortname="${name}"
+			icon="${application.osx.icon}"
+			jvmversion="${build.jvm}+"
+			build="${build.number}"
+			version="${new.version}"
+			dir="${dist}"
+			mainclass="${mainclass}"
+			jar="${jarfile}"
+			stubfile="${new.stub}"/>
+	</target>
+	<target name="app.run" depends="app" if="is.mac">
+		<exec dir="${dist}" executable="open">
+			<arg line="-a ${name}.app"/>
+		</exec>
+	</target>
+	<target name="mac.zip.mac" depends="version,app" description="Make mac zip on osx" if="is.mac">
+		<property name="mac.zip" value="${name}-mac-${new.version}.zip"/>
+		<property name="mac.zip.full" location="${dist}/${mac.zip}"/>
+		<zip destfile="${mac.zip.full}"
+			basedir="${dist}"
+			includes="${name}.app/**" />
+	</target>
+	<target name="mac.zip.other" depends="version,app" description="Make mac zip windows/unix/other" if="not.mac">
+		<property name="mac.zip" value="${name}-mac-${new.version}.zip"/>
+		<property name="mac.zip.full" location="${dist}/${mac.zip}"/>
+		<zip destfile="${mac.zip.full}"
+			basedir="${dist}"
+			includes="${name}.app/**">
+			<zipfileset dir="${dist}/${name}.app/Contents/MacOS" filemode="755" prefix="${name}.app/Contents/MacOS">
+				<include name="${name}"/>
+			</zipfileset>
+		</zip>
+	</target>
+	<target name="mac.zip" depends="mac.zip.mac,mac.zip.other" description="Make mac zip">
+
+	</target>
+	<target name="notdmg" description="Set distribution if not using dmg" if="not.mac">
+		<property name="mac.dmg" value="${mac.zip}"/>
+		<property name="mac.dmg.full" location="${mac.zip.full}"/>
+		<property name="mac.sf.type" value="binary_zip"/>
+	</target>
+	<target name="dmg" depends="mac.zip" description="Make dmg" if="is.mac">
+		<property name="mac.dmg" value="${name}-${new.version}.dmg"/>
+		<property name="mac.dmg.full" location="${dist}/${mac.dmg}"/>
+		<property name="mac.sf.type" value="dmg"/>
+		<!-- Requires OSX -->
+		<exec dir="${dist}" executable="hdiutil">
+			<arg line="create -ov -srcfolder ${name}.app ${mac.dmg}"/>
+		</exec>
+	</target>
+	<target name="win.zip" depends="version,exe" description="Make windows zip">
+		<property name="win.zip" value="${name}-win-${new.version}.zip"/>
+		<property name="win.zip.full" location="${dist}/${win.zip}"/>
+		<zip destfile="${win.zip.full}"
+			basedir="${dist}"
+			includes="${name}.exe" />
+	</target>
+	<target name="other.zip" depends="version,jar" description="Make other zip">
+		<property name="other.zip" value="${name}-other-${new.version}.zip"/>
+		<property name="other.zip.full" location="${dist}/${other.zip}"/>
+		<zip destfile="${other.zip.full}"
+			basedir="${dist}"
+			includes="${name}.jar" />
+	</target>
+	<target name="source.zip" depends="version,jar" description="Make source zip">
+		<property name="source.zip" value="${name}-source-${new.version}.zip"/>
+		<property name="source.zip.full" location="${dist}/${source.zip}"/>
+		<move file="${secret}" tofile="${secret.temp}"/>
+		<copy file="${secret.example}" tofile="${secret}"/>
+		<zip destfile="${source.zip.full}">
+			<fileset dir=".">
+				<include name="**"/>
+				<exclude name="**/.svn/**"/>
+				<exclude name="**/build/**"/>
+				<exclude name="${secret.temp}"/>
+			</fileset>
+		</zip>
+		<delete file="${secret}"/>
+		<move file="${secret.temp}" tofile="${secret}"/>
+	</target>
+
+	<target name="run" depends="jar" description="Run jar file">
+		<java jar="${jarfile}" fork="yes" failonerror="true"/>
+	</target>
+
+	<target name="build" description="Build exe,app" depends="exe,app">
+		<!-- At the moment build requires nothing else -->
+	</target>
+		
+	<target name="release" description="Create release dmg/zips" depends="dmg,win.zip,other.zip,source.zip">
+		<!-- At the moment release requires nothing else -->
+	</target>
+	
+	<target name="autoupdate" description="Create autoupdate entry" if="autoupdate.do" depends="release">
+		<condition property="autoupdate.source" value="${source.zip.full}">
+			<istrue value="${ftp.source}"/>
+		</condition>
+		<autoupdate
+			atompath="${atompath}"
+			apppage="${autoupdate.apppage}"
+			appname="${application.name}"
+			applinkbase="${appbaseuse}"
+			macdmg="${mac.dmg.full}"
+			maczip="${mac.zip.full}"
+			winzip="${win.zip.full}"
+			otherzip="${other.zip.full}"
+			sourcezip="${autoupdate.source}"
+			build="${build.number}"
+			version="${new.version}"
+		/>
+	</target>
+
+	<target name="ftp.autoupdate" description="Deploy Autoupdate File To FTP" if="ftp.autoupdate" depends="autoupdate">
+		<ftp server="${ftp.server}"
+			port="${ftp.port}"
+			remotedir="${ftp.dir}"
+			userid="${ftp.username}"
+			password="${ftp.password}">
+			<fileset dir=".">
+				<include name="${atomfile}"/>
+			</fileset>
+		</ftp>
+	</target>
+
+	<target name="ftp.source" description="Deploy Source File To FTP" if="ftp.dosource">
+		<ftp server="${ftp.server}"
+			port="${ftp.port}"
+			remotedir="${ftp.dir}"
+			userid="${ftp.username}"
+			password="${ftp.password}">
+			<fileset dir="${dist}">
+				<include name="${source.zip}"/>
+			</fileset>
+		</ftp>
+	</target>
+
+	<target name="ftp" description="Deploy All To FTP Location" depends="release,ftp.autoupdate,ftp.source">
+		<ftp server="${ftp.server}"
+			port="${ftp.port}"
+			remotedir="${ftp.dir}"
+			userid="${ftp.username}"
+			password="${ftp.password}">
+			<fileset dir="${dist}">
+				<include name="${mac.dmg}"/>
+				<include name="${mac.zip}"/>
+				<include name="${win.zip}"/>
+				<include name="${other.zip}"/>
+			</fileset>
+		</ftp>
+	</target>
+
+	<target name="sourceforge" description="Deploy All To Sourceforge" depends="release">
+		<tstamp>
+			<format property="sourceforge.date" pattern="d/M/yyyy"/>
+		</tstamp>
+		<sfpublish
+			releasename="${new.version}"
+			packagename="${sourceforge.project}"
+			packagehidden="no"
+			hidden="no"
+			projectshortname="${sourceforge.project}"
+			projectname="${sourceforge.project}"
+			username="${sourceforge.username}"
+			password="${sourceforge.password}"
+			releasedate="${sourceforge.date}">
+			<filespec
+				file="${source.zip.full}"
+				filetype="source_zip"
+				processortype="platform_independent"/>
+			<filespec
+				file="${other.zip.full}"
+				filetype="binary_zip"
+				processortype="platform_independent"/>
+			<filespec
+				file="${mac.dmg.full}"
+				filetype="${mac.sf.type}"
+				processortype="any"/>
+			<filespec
+				file="${win.zip.full}"
+				filetype="binary_zip"
+				processortype="i386"/>
+		</sfpublish>
+	</target>
+	
+	<target name="google.autoupdate" description="Deploy Autoupdate File To Google" if="google.autoupdate" depends="autoupdate">
+		<gcupload
+			username="${google.username}"
+			password="${google.password}"
+			projectname="${google.project}"
+			filename="${atompath}"
+			targetfilename="${atomfile}"
+			summary="${name} Autoupdate"
+			labels="${name}"/>
+	</target>
+	
+	<target name="google" description="Deploy All To GoogleCode" depends="release,google.autoupdate">
+		<gcupload
+			username="${google.username}"
+			password="${google.password}"
+			projectname="${google.project}"
+			filename="${source.zip.full}"
+			targetfilename="${source.zip}"
+			summary="${name} Source"
+			labels="OpSys-Windows, Type-Source, ${name}"/>
+		<gcupload
+			username="${google.username}"
+			password="${google.password}"
+			projectname="${google.project}"
+			filename="${other.zip.full}"
+			targetfilename="${other.zip}"
+			summary="${name} All Platforms"
+			labels="Featured, OpSys-All, OpSys-Linux, Type-Executable, ${name}"/>
+		<gcupload
+			username="${google.username}"
+			password="${google.password}"
+			projectname="${google.project}"
+			filename="${mac.dmg.full}"
+			targetfilename="${mac.dmg}"
+			summary="${name} Mac OSX"
+			labels="Featured, OpSys-OSX, Type-Executable, ${name}"/>
+		<gcupload
+			username="${google.username}"
+			password="${google.password}"
+			projectname="${google.project}"
+			filename="${win.zip.full}"
+			targetfilename="${win.zip}"
+			summary="${name} Windows"
+			labels="Featured, OpSys-Windows, Type-Executable, ${name}"/>
+	</target>
+
+	<target name="deploy" description="Deploy to sourceforge/googlecode/ftp" depends="sourceforge,google,ftp">
+		<!-- At the moment deploy requires nothing else -->
+	</target>
+
+	<target name="clean" description="Remove build and dist directories">
+		<delete dir="${build}"/>
+	</target>
+</project>
