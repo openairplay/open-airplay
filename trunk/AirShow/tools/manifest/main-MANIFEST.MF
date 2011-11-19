@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.6.5
+Created-By: 1.5.0_13-121 ("Apple Computer, Inc.")
+Main-Class: com.jameslow.Main
+
