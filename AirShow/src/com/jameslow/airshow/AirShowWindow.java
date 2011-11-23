@@ -104,7 +104,9 @@ public class AirShowWindow extends MainWindow implements ActionListener {
 			String[] all = {"mp4","m4v","mov","png","jpg","jpeg","gif"};
 			filters[0] = new Filefilter(all,"All");
 			File file = Main.OS().openFileDialog(this,false,"Open file",null,filters);
-			fileurl.setText(file.getAbsolutePath());
+			if (file != null) {
+				fileurl.setText(file.getAbsolutePath());
+			}
 		}
 	}
 	public boolean getJustHide() {
