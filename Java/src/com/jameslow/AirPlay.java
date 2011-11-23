@@ -155,8 +155,11 @@ public class AirPlay {
 						airplay.photoRaw(image,NONE);
 						Thread.sleep(Math.round(0.9*timeout));
 					}
+				} catch (InterruptedException e) {
+					break;
 				} catch (Exception e) {
 					e.printStackTrace();
+					break;
 				}
 			}
 		}
