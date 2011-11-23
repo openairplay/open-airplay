@@ -2,10 +2,11 @@ package com.jameslow.airshow;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import javax.swing.*;
 import com.jameslow.*;
+import com.jameslow.FileUtils.Filefilter;
 
 public class AirShowWindow extends MainWindow implements ActionListener {
 	protected AirPlay airplay;
@@ -71,6 +72,15 @@ public class AirShowWindow extends MainWindow implements ActionListener {
 			} catch (Exception e) {
 				error(e);
 			}
+		} else if(type.getSelectedIndex() == 1) {
+			try {
+				airplay = AirPlay.searchDialog(this);
+				if (airplay != null) {
+					airplay.photo(fileurl.getText());
+				}
+			} catch (Exception e) {
+				error(e);
+			}
 		} else {
 			JOptionPane.showMessageDialog(this,"This feature is not yet implemented, but will be in a future version.","Not implemented",JOptionPane.PLAIN_MESSAGE);
 		}
@@ -90,7 +100,14 @@ public class AirShowWindow extends MainWindow implements ActionListener {
 		} else if (e.getSource() == stop) {
 			stopAirPlay();
 		} else if (e.getSource() == browse) {
-			System.out.println("browse");
+			Filefilter[] filters = new Filefilter[1];
+			String[] all = {"mp4","m4v","mov","png","jpg","jpeg","gif"};
+			filters[0] = new Filefilter(all,"All");
+			File file = Main.OS().openFileDialog(this,false,"Open file",null,filters);
+			fileurl.setText(file.getAbsolutePath());
 		}
+	}
+	public boolean getJustHide() {
+		return true;
 	}
 }
