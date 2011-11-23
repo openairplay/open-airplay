@@ -215,6 +215,40 @@ public class AirPlay {
 		jmdns.close();
 		return results;
 	}
+	public static AirPlay searchDialog(Window parent) throws IOException {
+		return searchDialog(parent, 6000);
+	}
+	public static AirPlay searchDialog(Window parent, int timeout) throws IOException {
+		//TODO: could improve this dialog
+		JDialog search = new JDialog(parent, "Searching...");
+		search.setVisible(true);
+		search.setBounds(0,0,200,100);
+		search.setLocationRelativeTo(parent);
+		search.toFront();
+		search.setVisible(true);
+		AirPlay.Service[] services = AirPlay.search();
+		search.setVisible(false);
+		if (services.length > 0) {
+			//Choose AppleTV
+			String[] choices = new String[services.length];
+			for (int i = 0; i < services.length; i++) {
+				choices[i] = services[i].name + " (" + services[i].hostname + ")"; 
+			}
+			String input = (String) JOptionPane.showInputDialog(parent,"","Select AppleTV",JOptionPane.PLAIN_MESSAGE, null,choices,choices[0]);
+			if (input != null) {
+				int index = -1;
+				for (int i = 0; i < choices.length; i++) {
+					if (input == choices[i]) {
+						index = i;
+						break;
+					}
+				}
+				return new AirPlay(services[index]);
+			}
+			return null;
+		}
+		throw new IOException("No AppleTVs Found");
+	}
 	
 	// Command line functions
 	public static void usage() {
