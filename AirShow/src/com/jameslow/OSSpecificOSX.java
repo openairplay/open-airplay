@@ -1,13 +1,7 @@
 package com.jameslow;
 
-import java.awt.Component;
-import java.awt.FileDialog;
-import java.awt.Frame;
+import java.awt.*;
 import java.io.*;
-
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileSystemView;
-
 import com.apple.eawt.*;
 import com.apple.eio.FileManager;
 import com.jameslow.FileUtils.Filefilter;
