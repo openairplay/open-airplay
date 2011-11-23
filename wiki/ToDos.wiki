@@ -1,0 +1,11 @@
+#summary Things to do for this
+
+=== AirPlay ===
+ # Authorization for Java/PHP
+
+=== AirShow ===
+ # Icon
+ # Set auto update to go to google code
+ # Show image by url
+ # Show video by url
+ # Host video on webserver (jetty?)
