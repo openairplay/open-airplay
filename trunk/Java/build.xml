@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="AirPlay" default="jar" basedir=".">
+	<property file="secret.properties"/>
 	<property name="bin" location="bin"/>
 	<property name="build" location="build"/>
 	<property name="src" location="src"/>
@@ -44,5 +45,9 @@
 	
 	<target name="airshow" depends="jar" description="Copy jar to AirShow">
 		<copy file="${jar}" todir="../AirShow/lib"/>
+	</target>
+	
+	<target name="copy" depends="jar" description="Copy jar to copy.location">
+		<copy file="${jar}" todir="${copy.location}"/>
 	</target>
 </project>
