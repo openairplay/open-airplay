@@ -1,6 +1,6 @@
 package com.jameslow.airshow;
 
-import java.awt.AWTException;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.util.*;
@@ -64,44 +64,11 @@ public class AirShowWindow extends MainWindow implements ActionListener {
 		stopAirPlay();
 		if (type.getSelectedIndex() == 0) {
 			try {
-				//Search for airplay services
-				JDialog search = new JDialog(this, "Searching...");
-				search.setVisible(true);
-				search.setBounds(0,0,200,100);
-				search.setLocationRelativeTo(this);
-				search.toFront();
-				search.setVisible(true);
-				AirPlay.Service[] services = AirPlay.search();
-				search.setVisible(false);
-				if (services.length > 0) {
-					//Choose AppleTV
-					String[] choices = new String[services.length];
-					for (int i = 0; i < services.length; i++) {
-						choices[i] = services[i].name + " (" + services[i].hostname + ")"; 
-					}
-					String input = (String) JOptionPane.showInputDialog(this,"","Select AppleTV",JOptionPane.PLAIN_MESSAGE, null,choices,choices[0]);
-					if (input != null) {
-						int index = -1;
-						for (int i = 0; i < choices.length; i++) {
-							if (input == choices[i]) {
-								index = i;
-								break;
-							}
-						}
-						if (index >= 0) {
-							AirPlay.Service service = services[index];
-							airplay = new AirPlay(service);
-							try {
-								airplay.desktop();
-							} catch (Exception e) {
-								error(e);
-							}
-						}
-					}
-				} else {
-					JOptionPane.showMessageDialog(this,"No AppleTVs found, please make sure you're connected to a network.","Not found",JOptionPane.PLAIN_MESSAGE);
+				airplay = AirPlay.searchDialog(this);
+				if (airplay != null) {
+					airplay.desktop();
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				error(e);
 			}
 		} else {
