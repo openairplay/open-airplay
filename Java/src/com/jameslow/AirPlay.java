@@ -51,28 +51,64 @@ public class AirPlay {
 	public void setAuth(Auth auth) {
 		this.auth = auth;
 	}
-	protected String makeAuthorization(Map params, String password, String method, String uri) {
-		MessageDigest md5 = null;
+	protected String md5Digest(String input) {
+		byte[] source;
 		try {
-			md5 = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e) {
+			//Get byte according by specified coding.
+			source = input.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			source = input.getBytes();
+		}
+		String result = null;
+		char hexDigits[] = {'0', '1', '2', '3', '4', '5', '6', '7',
+				'8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(source);
+			//The result should be one 128 integer
+			byte temp[] = md.digest();
+			char str[] = new char[16 * 2];
+			int k = 0;
+			for (int i = 0; i < 16; i++) {
+				byte byte0 = temp[i];
+				str[k++] = hexDigits[byte0 >>> 4 & 0xf];
+				str[k++] = hexDigits[byte0 & 0xf];
+			}
+			result = new String(str);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return result;
+
+	}
+	protected String makeAuthorization(Map params, String password, String method, String uri) {
 		String realm = (String) params.get("realm");
-		String nounce = (String) params.get("nounce");
-		String ha1 = new String(md5.digest((USERNAME+":"+realm+":"+password).getBytes()));
-		String ha2 = new String(md5.digest((method+":"+uri).getBytes()));
-		String response = new String(md5.digest((ha1+":"+nounce+":"+ha2).getBytes()));
-		authorization = "Digest username="+USERNAME+",\r\n"
-			+"realm="+realm+",\r\n"
-			+"nouce="+nounce+",\r\n"
-			+"uri="+uri+",\r\n"
-			+"response="+response;
+		String nonce = (String) params.get("nonce");
+		String ha1 = md5Digest(USERNAME+":"+realm+":"+password);
+		String ha2 = md5Digest(method+":"+uri);
+		String response = md5Digest(ha1+":"+nonce+":"+ha2);
+		authorization = "Digest username=\""+USERNAME+"\", "
+			+"realm=\""+realm+"\", "
+			+"nonce=\""+nonce+"\", "
+			+"uri=\""+uri+"\", "
+			+"response=\""+response+"\"";
 		return authorization;
 	}
 	protected Map getAuthParams(String authString) {
 		Map params = new HashMap();
-		//TODO: process authString
+		int firstSpace = authString.indexOf(' ');
+		String digest = authString.substring(0,firstSpace);
+		String rest = authString.substring(firstSpace+1).replaceAll("\r\n"," ");
+		String[] lines = rest.split("\", ");
+		for (int i = 0; i < lines.length; i++) {
+			int split = lines[i].indexOf("=\"");
+			String key = lines[i].substring(0,split);
+			String value = lines[i].substring(split+2);
+			if (value.charAt(value.length()-1) == '"') {
+				value = value.substring(0,value.length()-1);
+			}
+			params.put(key,value);
+		}
 		return params;
 	}
 	protected String getResponse(HttpURLConnection conn, String method, String uri) throws IOException {
@@ -82,7 +118,12 @@ public class AirPlay {
 			return makeAuthorization(params,password,method,uri);
 		} else {
 			if (auth != null) {
-				return makeAuthorization(params,auth.getPassword(hostname,name),method,uri);
+				String password = auth.getPassword(hostname,name);
+				if (password != null) {
+					return makeAuthorization(params,password,method,uri);
+				} else {
+					return null;
+				}
 			} else {
 				throw new IOException("Authorisation requied");
 			}
@@ -133,8 +174,11 @@ public class AirPlay {
 		if (conn.getResponseCode() == 401) {
 			if (repeat) {
 				String response = getResponse(conn,method,uri);
-				headers.put("Authorization",response);
-				return doHTTP(method,uri,os,headers,false);
+				if (response != null) {
+					return doHTTP(method,uri,os,headers,false);
+				} else {
+					return null;
+				}
 			} else {
 				throw new IOException("Incorrect password");
 			}
@@ -251,9 +295,22 @@ public class AirPlay {
 		public abstract String getPassword(String hostname, String name);
 	}
 	public static class AuthDialog implements Auth {
+		private Window parent;
+		public AuthDialog(Window parent) {
+			this.parent = parent;
+		}
 		public String getPassword(String hostname, String name) {
-			//TODO: implement password dialog
-			return "";
+			final JPasswordField password = new JPasswordField();
+			JOptionPane optionPane = new JOptionPane(password,JOptionPane.PLAIN_MESSAGE,JOptionPane.OK_CANCEL_OPTION);
+			JDialog dialog = optionPane.createDialog(parent,"Password:");
+			dialog.setLocationRelativeTo(parent);
+			dialog.setVisible(true);
+			int result = (Integer)optionPane.getValue();
+			dialog.dispose();
+			if(result == JOptionPane.OK_OPTION){
+				return new String(password.getPassword());
+			}
+			return null;
 		}
 	}
 	public static class AuthConsole implements Auth {
@@ -328,7 +385,7 @@ public class AirPlay {
 					}
 				}
 				AirPlay airplay = new AirPlay(services[index]);
-				airplay.setAuth(new AuthDialog());
+				airplay.setAuth(new AuthDialog(parent));
 				return airplay;
 			}
 			return null;
