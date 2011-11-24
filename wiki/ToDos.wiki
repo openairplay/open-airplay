@@ -1,4 +1,4 @@
-#summary Things to do for this
+#summary Things to do for Open AirPlay
 
 === AirPlay ===
  # Digest Authorization for PHP
