@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import java.net.*;
+import java.security.*;
 import java.util.*;
 import javax.imageio.*;
 import javax.jmdns.*;
@@ -17,23 +18,75 @@ public class AirPlay {
 	public static final String SLIDE_LEFT = "SlideLeft";
 	public static final String SLIDE_RIGHT = "SlideRight";
 	public static final String DISSOLVE = "Dissolve";
+	public static final String USERNAME = "Airplay";
 	public static final int PORT = 7000;
 	
 	protected String hostname;
+	protected String name;
 	protected int port;
 	protected PhotoThread photothread;
+	protected String password;
+	protected String authorization;
 	protected Auth auth;
 	
 	//AirPlay class
 	public AirPlay(Service service) {
-		this(service.hostname,service.port);
+		this(service.hostname,service.port,service.name);
 	}
 	public AirPlay(String hostname) {
 		this(hostname,PORT);
 	}
 	public AirPlay(String hostname, int port) {
+		this(hostname,port,hostname);
+	}
+	public AirPlay(String hostname, int port, String name) {
 		this.hostname = hostname;
 		this.port = port;
+		this.name = name;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public void setAuth(Auth auth) {
+		this.auth = auth;
+	}
+	protected String makeAuthorization(Map params, String password, String method, String uri) {
+		MessageDigest md5 = null;
+		try {
+			md5 = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		String realm = (String) params.get("realm");
+		String nounce = (String) params.get("nounce");
+		String ha1 = new String(md5.digest((USERNAME+":"+realm+":"+password).getBytes()));
+		String ha2 = new String(md5.digest((method+":"+uri).getBytes()));
+		String response = new String(md5.digest((ha1+":"+nounce+":"+ha2).getBytes()));
+		authorization = "Digest username="+USERNAME+",\r\n"
+			+"realm="+realm+",\r\n"
+			+"nouce="+nounce+",\r\n"
+			+"uri="+uri+",\r\n"
+			+"response="+response;
+		return authorization;
+	}
+	protected Map getAuthParams(String authString) {
+		Map params = new HashMap();
+		//TODO: process authString
+		return params;
+	}
+	protected String getResponse(HttpURLConnection conn, String method, String uri) throws IOException {
+		String authstring = conn.getHeaderFields().get("WWW-Authenticate").get(0);
+		Map params = getAuthParams(authstring);
+		if (password != null) {
+			return makeAuthorization(params,password,method,uri);
+		} else {
+			if (auth != null) {
+				return makeAuthorization(params,auth.getPassword(hostname,name),method,uri);
+			} else {
+				throw new IOException("Authorisation requied");
+			}
+		}
 	}
 	protected String doHTTP(String method, String uri) throws IOException {
 		return doHTTP(method, uri, null);
@@ -42,7 +95,9 @@ public class AirPlay {
 		return doHTTP(method, uri, os, null);
 	}
 	protected String doHTTP(String method, String uri, ByteArrayOutputStream os, Map headers) throws IOException {
-		//TODO: Add authentication for 401, username = Airplay, check for auth otherwise fail
+		return doHTTP(method, uri, os, new HashMap(), true);
+	}
+	protected String doHTTP(String method, String uri, ByteArrayOutputStream os, Map headers, boolean repeat) throws IOException {
 		URL url = null;
 		try {
 			url = new URL("http://"+hostname+":"+port+uri);
@@ -52,7 +107,11 @@ public class AirPlay {
 		conn.setDoOutput(true);
 		conn.setRequestMethod(method);
 		
-		if (headers != null) {
+		if (authorization != null) {
+			//Try to reuse authorizatin if already set
+			headers.put("Authorization",authorization);
+		}
+		if (headers.size() > 0) {
 			conn.setRequestProperty("User-Agent","MediaControl/1.0");
 			Object[] keys = headers.keySet().toArray();
 			for (int i = 0; i < keys.length; i++) {
@@ -71,18 +130,28 @@ public class AirPlay {
 			os.close();
 		}
 		
-		//TODO: Only readback Content-Length?
-		//conn.getHeaderField("Content-Length");
-		InputStream is = conn.getInputStream();
-		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-		String line;
-		StringBuffer response = new StringBuffer(); 
-		while((line = rd.readLine()) != null) {
-			response.append(line);
-			response.append("\r\n");
+		if (conn.getResponseCode() == 401) {
+			if (repeat) {
+				String response = getResponse(conn,method,uri);
+				headers.put("Authorization",response);
+				return doHTTP(method,uri,os,headers,false);
+			} else {
+				throw new IOException("Incorrect password");
+			}
+		} else {
+			//TODO: Only readback Content-Length? - right now not doing, seems to work different than PHP
+			//conn.getHeaderField("Content-Length");
+			InputStream is = conn.getInputStream();
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+			String line;
+			StringBuffer response = new StringBuffer(); 
+			while((line = rd.readLine()) != null) {
+				response.append(line);
+				response.append("\r\n");
+			}
+			rd.close();
+			return response.toString();
 		}
-		rd.close();
-		return response.toString();
 	}
 	public void stop() {
 		try {
@@ -177,8 +246,21 @@ public class AirPlay {
 		photothread.start();
 	}
 	
+	//Auth classes
 	public static interface Auth {
-		public abstract String getAuth(String hostname, String name);
+		public abstract String getPassword(String hostname, String name);
+	}
+	public static class AuthDialog implements Auth {
+		public String getPassword(String hostname, String name) {
+			//TODO: implement password dialog
+			return "";
+		}
+	}
+	public static class AuthConsole implements Auth {
+		public String getPassword(String hostname, String name) {
+			String display = hostname == name ? hostname : name+" ("+hostname+")";
+			return AirPlay.waitforuser("Please input password for "+display);
+		}
 	}
 	
 	//Bonjour classes
@@ -222,7 +304,6 @@ public class AirPlay {
 		return searchDialog(parent, 6000);
 	}
 	public static AirPlay searchDialog(Window parent, int timeout) throws IOException {
-		//TODO: could improve this dialog
 		JDialog search = new JDialog(parent, "Searching...");
 		search.setVisible(true);
 		search.setBounds(0,0,200,100);
@@ -246,7 +327,9 @@ public class AirPlay {
 						break;
 					}
 				}
-				return new AirPlay(services[index]);
+				AirPlay airplay = new AirPlay(services[index]);
+				airplay.setAuth(new AuthDialog());
+				return airplay;
 			}
 			return null;
 		}
@@ -256,17 +339,21 @@ public class AirPlay {
 	// Command line functions
 	public static void usage() {
 		System.out.println("commands: -s {stop} | -p file {photo} | -d {desktop}");
-		System.out.println("java -jar airplay.jar -h hostname[:port] command");
+		System.out.println("java -jar airplay.jar -h hostname[:port] [-a password] command");
 	}
-	public static void waitforuser() {
-		System.out.println("Press return to quit");
+	public static String waitforuser() {
+		return waitforuser("Press return to quit");
+	}
+	public static String waitforuser(String message) {
+		System.out.println(message);
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		String s;
+		String s = null;
 		try {
 			while ((s = in.readLine()) != null && !(s.length() >= 0)) { }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return s;
 	}
 	public static void main(String[] args) {
 		try {
@@ -275,6 +362,7 @@ public class AirPlay {
 			CmdLineParser.Option stopopt = cmd.addBooleanOption('s',"stop");
 			CmdLineParser.Option photoopt = cmd.addStringOption('p',"photo");
 			CmdLineParser.Option desktopopt = cmd.addBooleanOption('d',"desktop");
+			CmdLineParser.Option passopt = cmd.addStringOption('a',"password");
 			cmd.parse(args);
 			String hostname = (String) cmd.getOptionValue(hostopt);
 			
@@ -288,6 +376,9 @@ public class AirPlay {
 				} else {
 					airplay = new AirPlay(hostport[0]);
 				}
+				airplay.setAuth(new AuthConsole());
+				String password = (String) cmd.getOptionValue(passopt);
+				airplay.setPassword(password);
 				String photo;
 				if (cmd.getOptionValue(stopopt) != null) {
 					airplay.stop();
