@@ -2,7 +2,6 @@
 
 === AirPlay ===
  # Authorization for Java/PHP
- # Add to limegreen
 
 === AirShow ===
  # Icon
