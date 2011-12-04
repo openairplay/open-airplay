@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:limegreen="http://code.google.com/p/limegreen">
+<id>http://jameslow.com/work/airshow/</id>
+<title>AirShow AutoUpdate</title>
+<link href="http://open-airplay.googlecode.com/files/AirShow.xml" rel="self"/>
+<link href="http://jameslow.com/work/airshow/"/>
+<author>
+<name>Limegreen AutoUpdate Generator</name>
+</author>
+<updated>2011-12-04T15:23:39+08:00</updated>
+<entry>
+<id>http://jameslow.com/work/airshow/?limegreenbuild=80</id>
+<title>AirShow 0.1 (build 80)</title>
+<limegreen:build>80</limegreen:build>
+<limegreen:version>0.1</limegreen:version>
+<limegreen:experimental>false</limegreen:experimental>
+<updated>2011-12-04T15:23:39+08:00</updated>
+<link href="http://jameslow.com/work/airshow/?limegreenbuild=80"/>
+<link href="http://open-airplay.googlecode.com/files/AirShow-win-0.1.zip" length="1238882" rel="enclosure" title="AirShow Win Zip" type="application/zip"/>
+<link href="http://open-airplay.googlecode.com/files/AirShow-mac-0.1.zip" length="979301" rel="enclosure" title="AirShow Mac Zip" type="application/zip"/>
+<link href="http://open-airplay.googlecode.com/files/AirShow-other-0.1.zip" length="964715" rel="enclosure" title="AirShow Other Zip" type="application/zip"/>
+<link href="http://open-airplay.googlecode.com/files/AirShow-0.1.dmg" length="995638" rel="enclosure" title="AirShow Mac Disk Image" type="application/octet-stream"/>
+<content>Initial version with desktop and single photo sending</content>
+</entry>
+</feed>
