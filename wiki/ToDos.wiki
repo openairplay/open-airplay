@@ -6,6 +6,5 @@
  # Show video by url
 
 === AirShow ===
- # Icon
  # Set auto update to go to google code
  # Host video on webserver (jetty?)
