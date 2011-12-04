@@ -4,7 +4,4 @@
  # Digest Authorization for PHP
  # Show image by url
  # Show video by url
-
-=== AirShow ===
- # Set auto update to go to google code
  # Host video on webserver (jetty?)
