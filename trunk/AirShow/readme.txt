@@ -1,1 +1,0 @@
-For information see: http://code.google.com/p/limegreen/
