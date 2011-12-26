@@ -1,7 +1,0 @@
-#summary Things to do for Open AirPlay
-
-=== AirPlay ===
- # Digest Authorization for PHP
- # Show image by url
- # Show video by url
- # Host video on webserver (jetty?)
