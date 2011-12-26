@@ -20,6 +20,9 @@ public class AirPlay {
 	public static final String DISSOLVE = "Dissolve";
 	public static final String USERNAME = "Airplay";
 	public static final int PORT = 7000;
+	public static final int APPLETV_WIDTH = 1280;
+	public static final int APPLETV_HEIGHT = 720;
+	public static final float APPLETV_ASPECT = (float) APPLETV_WIDTH/APPLETV_HEIGHT;
 	
 	protected String hostname;
 	protected String name;
@@ -28,6 +31,9 @@ public class AirPlay {
 	protected String password;
 	protected String authorization;
 	protected Auth auth;
+	protected int appletv_width = APPLETV_WIDTH;
+	protected int appletv_height = APPLETV_HEIGHT;
+	protected float appletv_aspect = APPLETV_ASPECT;
 	
 	//AirPlay class
 	public AirPlay(Service service) {
@@ -44,7 +50,11 @@ public class AirPlay {
 		this.port = port;
 		this.name = name;
 	}
-
+	public void setScreenSize(int width, int height) {
+		appletv_width = width;
+		appletv_height = height;
+		appletv_aspect = (float) width/height;
+	}
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -203,6 +213,29 @@ public class AirPlay {
 			doHTTP("POST", "/stop");
 		} catch (Exception e) { }
 	}
+	protected BufferedImage scaleImage(BufferedImage image) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		if (width <= appletv_width && height <= appletv_height) {
+			return image;
+		} else {
+			int scaledheight;
+			int scaledwidth;
+			float image_aspect = (float) width/height;
+			if (image_aspect > appletv_aspect) {
+				scaledheight = new Float(appletv_width / image_aspect).intValue();
+				scaledwidth = appletv_width;
+			} else {
+				scaledheight = appletv_height;
+				scaledwidth = new Float(appletv_height * image_aspect).intValue();
+			}
+			BufferedImage scaledimage = new BufferedImage(scaledwidth, scaledheight, BufferedImage.TYPE_INT_RGB);
+			Graphics2D g = scaledimage.createGraphics();
+			g.drawImage(image, 0, 0, scaledwidth, scaledheight, null); 
+			g.dispose();
+			return scaledimage;
+		}
+	}
 	public void photo(String filename) throws IOException {
 		this.photo(filename,NONE);
 	}
@@ -221,15 +254,20 @@ public class AirPlay {
 	}
 	public void photo(BufferedImage image, String transition) throws IOException {
 		stopPhotoThread();
-		photoRaw(image,transition);
-		photothread = new PhotoThread(this,image,5000);
+		BufferedImage scaledimage = scaleImage(image);
+		photoRaw(scaledimage,transition);
+		photothread = new PhotoThread(this,scaledimage,5000);
 		photothread.start();
 	}
-	public void photoRaw(BufferedImage image, String transition) throws IOException {
+	protected void photoRawCompress(BufferedImage image, String transition) throws IOException {
+		BufferedImage scaledimage = scaleImage(image);
+		photoRaw(scaledimage, transition);
+	}
+	protected void photoRaw(BufferedImage image, String transition) throws IOException {
 		Map headers = new HashMap();
 		headers.put("X-Apple-Transition",transition);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		boolean resultWrite = ImageIO.write(image, "PNG", os);
+		boolean resultWrite = ImageIO.write(image, "jpg", os);
 		/* TODO: Could adjust quality
 		 * http://www.java.net/node/689678
 		 * http://www.exampledepot.com/egs/javax.imageio/JpegWrite.html
@@ -263,7 +301,7 @@ public class AirPlay {
 			while (!Thread.interrupted()) {
 				try {
 					if (image == null) {
-						airplay.photoRaw(AirPlay.captureScreen(),NONE);
+						airplay.photoRawCompress(AirPlay.captureScreen(),NONE);
 					} else {
 						airplay.photoRaw(image,NONE);
 						Thread.sleep(Math.round(0.9*timeout));
