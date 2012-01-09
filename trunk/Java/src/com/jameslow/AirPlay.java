@@ -29,6 +29,7 @@ public class AirPlay {
 	protected int port;
 	protected PhotoThread photothread;
 	protected String password;
+	protected Map params;
 	protected String authorization;
 	protected Auth auth;
 	protected int appletv_width = APPLETV_WIDTH;
@@ -121,19 +122,13 @@ public class AirPlay {
 		}
 		return params;
 	}
-	protected String getResponse(HttpURLConnection conn, String method, String uri) throws IOException {
-		String authstring = conn.getHeaderFields().get("WWW-Authenticate").get(0);
-		Map params = getAuthParams(authstring);
+	protected String setPassword() throws IOException {
 		if (password != null) {
-			return makeAuthorization(params,password,method,uri);
+			return password;
 		} else {
 			if (auth != null) {
-				String password = auth.getPassword(hostname,name);
-				if (password != null) {
-					return makeAuthorization(params,password,method,uri);
-				} else {
-					return null;
-				}
+				password = auth.getPassword(hostname,name);
+				return password;
 			} else {
 				throw new IOException("Authorisation requied");
 			}
@@ -157,10 +152,10 @@ public class AirPlay {
 		conn.setUseCaches(false);
 		conn.setDoOutput(true);
 		conn.setRequestMethod(method);
-		
-		if (authorization != null) {
-			//Try to reuse authorizatin if already set
-			headers.put("Authorization",authorization);
+
+		if (params != null) {
+			//Try to reuse password if already set
+			headers.put("Authorization",makeAuthorization(params,password,method,uri));
 		}
 		if (headers.size() > 0) {
 			conn.setRequestProperty("User-Agent","MediaControl/1.0");
@@ -183,8 +178,9 @@ public class AirPlay {
 		
 		if (conn.getResponseCode() == 401) {
 			if (repeat) {
-				String response = getResponse(conn,method,uri);
-				if (response != null) {
+				String authstring = conn.getHeaderFields().get("WWW-Authenticate").get(0);
+				if (setPassword() != null) {
+					params = getAuthParams(authstring);
 					return doHTTP(method,uri,os,headers,false);
 				} else {
 					return null;
@@ -211,6 +207,7 @@ public class AirPlay {
 		try {
 			stopPhotoThread();
 			doHTTP("POST", "/stop");
+			params = null;
 		} catch (Exception e) { }
 	}
 	protected BufferedImage scaleImage(BufferedImage image) {
