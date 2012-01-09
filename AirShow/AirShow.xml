@@ -7,7 +7,7 @@
 <author>
 <name>Limegreen AutoUpdate Generator</name>
 </author>
-<updated>2011-12-04T21:16:31+08:00</updated>
+<updated>2012-01-04T17:26:15+08:00</updated>
 <entry>
 <id>http://jameslow.com/work/airshow/?limegreenbuild=80</id>
 <title>AirShow 0.1 (build 80)</title>
@@ -36,5 +36,19 @@
 <link href="http://open-airplay.googlecode.com/files/AirShow-0.2.dmg" length="1112217" rel="enclosure" title="AirShow Mac Disk Image" type="application/octet-stream"/>
 <content>Fix auto update so it works
 Add about image</content>
+</entry>
+<entry>
+<id>http://jameslow.com/work/airshow/?limegreenbuild=91</id>
+<title>AirShow 0.3 (build 91)</title>
+<limegreen:build>91</limegreen:build>
+<limegreen:version>0.3</limegreen:version>
+<limegreen:experimental>false</limegreen:experimental>
+<updated>2012-01-04T17:26:15+08:00</updated>
+<link href="http://jameslow.com/work/airshow/?limegreenbuild=91"/>
+<link href="http://open-airplay.googlecode.com/files/AirShow-win-0.3.zip" length="1272765" rel="enclosure" title="AirShow Win Zip" type="application/zip"/>
+<link href="http://open-airplay.googlecode.com/files/AirShow-mac-0.3.zip" length="1096105" rel="enclosure" title="AirShow Mac Zip" type="application/zip"/>
+<link href="http://open-airplay.googlecode.com/files/AirShow-other-0.3.zip" length="993628" rel="enclosure" title="AirShow Other Zip" type="application/zip"/>
+<link href="http://open-airplay.googlecode.com/files/AirShow-0.3.dmg" length="1113305" rel="enclosure" title="AirShow Mac Disk Image" type="application/octet-stream"/>
+<content>Optimise image scaling for 720p</content>
 </entry>
 </feed>
