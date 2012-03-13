@@ -579,7 +579,6 @@ public class AutoUpdate extends Thread implements ActionListener, ItemListener, 
 	//We're at the download and extracting stage
 	public static void main(String[] args) {
 		try {
-			//TODO: Remove?
 			System.setProperty("com.apple.mrj.application.apple.menu.about.name",AUTOUPDATE);
 			System.setProperty("apple.laf.useScreenMenuBar","true");
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
