@@ -33,6 +33,7 @@ public class Generator extends JFrame implements WindowListener, ItemListener, A
 	private String appname;
 	private String apppage;
 	private String applinkbase;
+	private String xmllinkbase;
 
 	//Version specific
 	private String version;
@@ -75,6 +76,7 @@ public class Generator extends JFrame implements WindowListener, ItemListener, A
 	private static final String VERSION_SPLIT = "\\.";
 	private static final String s = "/";
 	private static final String d = ".";
+	private static final String VERSION = "%version%";
 
 	public Generator() {
 		try {
@@ -146,6 +148,9 @@ public class Generator extends JFrame implements WindowListener, ItemListener, A
 	public void setApplinkbase(String applinkbase) {
 		this.applinkbase = applinkbase;
 	}
+	public void setXmllinkbase(String xmllinkbase) {
+		this.xmllinkbase = xmllinkbase;
+	}
 	
 	//Version specific
 	public void setVersion(String version) {
@@ -183,7 +188,7 @@ public class Generator extends JFrame implements WindowListener, ItemListener, A
 		for (int i=0; i < links.length; i++) {
 			String rel = links[i].getAttribute(ATOM_LINK_REL);
 			if (ATOM_LINK_REL_SELF.compareTo(rel) == 0) {
-				links[i].setAttribute(ATOM_LINK_HREF,applinkbase+s+atomfile);
+				links[i].setAttribute(ATOM_LINK_HREF,xmllinkbase+s+atomfile);
 				doneself = true;
 			} else {
 				links[i].setAttribute(ATOM_LINK_HREF,apppage);
@@ -193,7 +198,7 @@ public class Generator extends JFrame implements WindowListener, ItemListener, A
 		if (!doneself) {
 			XMLHelper link = helper.createSubNode(ATOM_LINK);
 			link.setAttribute(ATOM_LINK_REL,ATOM_LINK_REL_SELF);
-			link.setAttribute(ATOM_LINK_HREF,applinkbase+s+atomfile);
+			link.setAttribute(ATOM_LINK_HREF,xmllinkbase+s+atomfile);
 		}
 		if (!donepage) {
 			XMLHelper link = helper.createSubNode(ATOM_LINK);
@@ -239,8 +244,14 @@ public class Generator extends JFrame implements WindowListener, ItemListener, A
 		File file = new File(filepath);
 		return file.getName();
 	}
+	private String replaceVersion(String str) {
+		return str.replaceAll(VERSION, version);
+	}
 	public void execute() {
 		//derived properties
+		xmllinkbase = xmllinkbase != null ? xmllinkbase : applinkbase;
+		xmllinkbase = replaceVersion(xmllinkbase);
+		applinkbase = replaceVersion(applinkbase);
 		atomfile = getFileName(atompath);
 		
 		//timestamp
