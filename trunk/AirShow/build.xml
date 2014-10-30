@@ -5,6 +5,7 @@
 	<property name="secret.example" value="secret.example.properties"/>
 	<property name="secret.temp" value="secret.temp.properties"/>
 	<property file="${props}"/>
+	<property file="${secret}"/>
 	<property name="name" value="${application.name}"/>
 	<!-- Preexisitng Directories -->
 	<property name="src" location="src"/>
@@ -25,6 +26,8 @@
 			<property name="jsmooth.infile" location="${jsmooth}/ant.jsmooth"/>
 		<property name="applejava" location="${tools}/applejava"/>
 		<property name="google" location="${tools}/google"/>
+		<property name="github" location="${tools}/github"/>
+		<property name="s3upload" location="${tools}/s3upload"/>
 	<!-- Output Directories -->
 	<property name="build" location="build"/>
 		<property name="misc" location="${build}/misc"/>
@@ -51,6 +54,7 @@
 		<istrue value="${secret.present}"/>
 	</condition>
 
+	<!-- Ant tasks -->
 	<fileset id="jar.jars" dir="${jarbundler}">
 		<include name="**/*.jar"/>
 	</fileset>
@@ -58,6 +62,7 @@
 		<fileset refid="jar.jars"/>
 	</path>
 	<taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpathref="jar.path"/>
+
 	<fileset id="jsmooth.jars" dir="${jsmooth}">
 		<include name="**/*.jar"/>
 	</fileset>
@@ -65,6 +70,7 @@
 		<fileset refid="jsmooth.jars"/>
 	</path>
 	<taskdef name="jsmoothgen" classname="net.charabia.jsmoothgen.ant.JSmoothGen" classpathref="jsmooth.path"/>
+
 	<fileset id="google.jars" dir="${google}">
 		<include name="**/*.jar"/>
 	</fileset>
@@ -73,6 +79,7 @@
 	</path>
 	<taskdef classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" classpathref="google.path" name="gcupload"/>
 	<taskdef classname="com.jameslow.update.Generator" classpath="${autoupdate}" name="autoupdate"/>
+
 	<fileset id="ant.jars" dir="${antlib}">
 		<include name="**/*.jar"/>
 	</fileset>
@@ -80,6 +87,28 @@
 		<fileset refid="ant.jars"/>
 	</path>
 	<taskdef name="ftp" classname="org.apache.tools.ant.taskdefs.optional.net.FTP" classpathref="ant.path"/>
+
+	<fileset id="github-anttasks.jars" dir="${github}/lib">
+		<include name="**/*.jar"/>
+	</fileset>
+	<path id="github-anttasks.classpath">
+		<fileset refid="github-anttasks.jars"/>
+		<pathelement location="."/>
+		<fileset dir="${github}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	<taskdef name="github.createrelease" classname="com.github.api.CreateRelease" classpathref="github-anttasks.classpath" loaderref="github-anttasks.classpath.loader" />
+	<taskdef name="github.uploadasset" classname="com.github.api.UploadAsset" classpathref="github-anttasks.classpath" loaderref="github-anttasks.classpath.loader" />
+	<taskdef name="github.fullrelease" classname="com.github.api.FullRelease" classpathref="github-anttasks.classpath" loaderref="github-anttasks.classpath.loader" />
+
+	<fileset id="aws.jars" dir="${s3upload}">
+		<include name="**/*.jar"/>
+	</fileset>
+	<path id="aws.path">
+		<fileset refid="aws.jars"/>
+	</path>
+	<taskdef name="s3upload" classname="dak.ant.taskdefs.S3Upload" classpathref="aws.path"/>
 
 	<fileset id="antlib.jars" dir="${antlib}">
 		<include name="**/*.jar"/>
@@ -93,6 +122,7 @@
 	<!-- <taskdef classname="org.apache.tools.ant.taskdefs.optional.ssh.Scp" classpath="${antlib.classpath}" name="scp"/> -->
 	<taskdef classname="com.jameslow.Substring" classpath="${antlib}" name="substring"/>
 
+	<!-- How to build main jar -->
 	<condition property="onejar.do">
 		<istrue value="${onejar.use}"/>
 	</condition>
@@ -111,37 +141,146 @@
 	<condition property="mainclass" value="${main.class}">
 		<isfalse value="${onejar.use}"/>
 	</condition>
-	<condition property="appbaseuse" value="${autoupdate.applinkbase}">
-		<isfalse value="${autoupdate.usegoogle}"/>
+	
+	<!-- Which uploads to do -->
+	<condition property="upload.s3">
+		<matches string="${aws.key}" pattern=".+"/>
 	</condition>
-	<condition property="appbaseuse" value="http://${google.project}.googlecode.com/files">
-		<istrue value="${autoupdate.usegoogle}"/>
+	<condition property="upload.ftp">
+		<matches string="${ftp.username}" pattern=".+"/>
 	</condition>
+	<condition property="upload.github">
+		<matches string="${github.tokenuser}" pattern=".+"/>
+	</condition>
+	<condition property="upload.google">
+		<matches string="${google.username}" pattern=".+"/>
+	</condition>
+	<condition property="upload.sourceforge">
+		<matches string="${sourceforge.username}" pattern=".+"/>
+	</condition>
+	
+	<!-- Do auto update -->
 	<condition property="autoupdate.do">
 		<istrue value="${autoupdate.enable}"/>
 	</condition>
+	<!-- Which auto update takes priority for xml file -->
+	<condition property="autoupdate.s3">
+		<and>
+			<isset property="autoupdate.do"/>
+			<isset property="upload.s3"/>
+		</and>
+	</condition>
+	<condition property="autoupdate.ftp">
+		<and>
+			<isset property="autoupdate.do"/>
+			<isset property="upload.ftp"/>
+			<not><isset property="autoupdate.s3"/></not>
+		</and>
+	</condition>
+	<condition property="autoupdate.github">
+		<and>
+			<isset property="autoupdate.do"/>
+			<isset property="upload.github"/>
+			<not><isset property="autoupdate.ftp"/></not>
+		</and>
+	</condition>
+	<condition property="autoupdate.google">
+		<and>
+			<isset property="autoupdate.do"/>
+			<isset property="upload.google"/>
+			<not><isset property="autoupdate.github"/></not>
+		</and>
+	</condition>
+	<condition property="autoupdate.sourceforge">
+		<and>
+			<isset property="autoupdate.do"/>
+			<isset property="upload.sourceforge"/>
+			<not><isset property="autoupdate.google"/></not>
+		</and>
+	</condition>
+	<!-- Other auto update -->
+	<condition property="autoupdate.dosource">
+		<istrue value="${autoupdate.uploadsource}"/>
+	</condition>
+	<condition property="autoupdate.upload">
+		<and>
+			<contains string="${autoupdate.type}" substring="upload"/>
+			<or>
+				<isset property="autoupdate.s3"/>
+				<isset property="autoupdate.ftp"/>
+				<isset property="autoupdate.google"/>
+			</or>
+		</and>
+	</condition>
+	<condition property="autoupdate.source">
+		<and>
+			<contains string="${autoupdate.type}" substring="source"/>
+			<or>
+				<isset property="autoupdate.github"/>
+				<isset property="autoupdate.google"/>
+			</or>
+		</and>
+	</condition>
 	<condition property="google.autoupdate">
 		<and>
-			<istrue value="${autoupdate.usegoogle}"/>
-			<istrue value="${autoupdate.enable}"/>
+			<isset property="autoupdate.google"/>
+			<isset property="autoupdate.upload"/>
 		</and>
 	</condition>
-	<condition property="ftp.autoupdate">
+	<!-- Auto update paths -->
+	<condition property="applinkbase" value="${autoupdate.applinkbase}">
+		<matches string="${autoupdate.applinkbase}" pattern=".+"/>
+	</condition>
+	<condition property="applinkbase" value="http://${google.project}.googlecode.com/files">
 		<and>
-			<isfalse value="${autoupdate.usegoogle}"/>
-			<istrue value="${autoupdate.enable}"/>
+			<not><isset property="applinkbase"/></not>
+			<isset property="autoupdate.google"/>
 		</and>
 	</condition>
-	<condition property="ftp.dosource">
-		<istrue value="${ftp.source}"/>
+	<condition property="applinkbase" value="http://s3.amazonaws.com/${aws.s3}">
+		<!-- This can be overridden to use your own domain name by hard coding autoupdate.applinkbase in the build.properties file -->
+		<and>
+			<not><isset property="applinkbase"/></not>
+			<isset property="autoupdate.s3"/>
+		</and>
 	</condition>
+	<condition property="applinkbase" value="http://github.com/${github.repouser}/${github.repo}/releases/download/%version%/">
+		<and>
+			<not><isset property="applinkbase"/></not>
+			<isset property="autoupdate.github"/>
+		</and>
+	</condition>
+	<!-- Auto update xml paths -->
+	<condition property="xmllinkbase" value="${autoupdate.xmllinkbase}">
+		<matches string="${autoupdate.xmllinkbase}" pattern=".+"/>
+	</condition>
+	<condition property="xmllinkbase" value="${autoupdate.applinkbase}">
+		<and>
+			<not><isset property="xmllinkbase"/></not>
+			<isset property="autoupdate.upload"/>
+		</and>
+	</condition>
+	<condition property="xmllinkbase" value="http://${google.project}.googlecode.com/svn/trunk/">
+		<and>
+			<not><isset property="xmllinkbase"/></not>
+			<isset property="autoupdate.source"/>
+			<isset property="autoupdate.google"/>
+		</and>
+	</condition>
+	<condition property="xmllinkbase" value="https://raw.githubusercontent.com/${github.repouser}/${github.repo}/master/">
+		<and>
+			<not><isset property="xmllinkbase"/></not>
+			<isset property="autoupdate.source"/>
+			<isset property="autoupdate.github"/>
+		</and>
+	</condition>
+	
+	<!-- Platform detection -->
 	<condition property="is.mac">
 		<os family="mac"/>
 	</condition>
 	<condition property="not.mac">
-		<not>
-			<os family="mac"/>
-		</not>
+		<not><isset property="is.mac"/></not>
 	</condition>
 	<condition property="is.windows">
 		<os family="windows"/>
@@ -149,14 +288,14 @@
 	<condition property="is.unix">
 		<and>
 			<os family="unix"/>
-			<not><os family="mac"/></not>
+			<isset property="not.mac"/>
 		</and>
 	</condition>
 	<condition property="is.other">
 		<and>
-			<not><os family="mac"/></not>
-			<not><os family="unix"/></not>
-			<not><os family="windows"/></not>
+			<not><isset property="is.mac"/></not>
+			<not><isset property="is.unix"/></not>
+			<not><isset property="is.windows"/></not>
 		</and>
 	</condition>
 
@@ -409,64 +548,46 @@
 	</target>
 	
 	<target name="autoupdate" description="Create autoupdate entry" if="autoupdate.do" depends="release">
-		<condition property="autoupdate.source" value="${source.zip.full}">
-			<istrue value="${ftp.source}"/>
+		<condition property="autoupdate.source.zip.full" value="${source.zip.full}">
+			<isset property="autoupdate.dosource"/>
 		</condition>
 		<autoupdate
 			atompath="${atompath}"
 			apppage="${autoupdate.apppage}"
 			appname="${application.name}"
-			applinkbase="${appbaseuse}"
+			applinkbase="${applinkbase}"
+			xmllinkbase="${xmllinkbase}"
 			macdmg="${mac.dmg.full}"
 			maczip="${mac.zip.full}"
 			winzip="${win.zip.full}"
 			otherzip="${other.zip.full}"
-			sourcezip="${autoupdate.source}"
+			sourcezip="${autoupdate.source.zip.full}"
 			build="${build.number}"
 			version="${new.version}"
 		/>
 	</target>
 
-	<target name="ftp.autoupdate" description="Deploy Autoupdate File To FTP" if="ftp.autoupdate" depends="autoupdate">
+	<fileset id="uploadfiles" dir="${dist}" casesensitive="yes">
+		<!-- Right not this will be included if you upload to GitHub as well as doing and upload do S3 or FTP which take priority -->
+		<include name="${atomfile}" if="${autoupdate.upload}"/>
+		<include name="${source.zip}" if="${autoupdate.dosource}"/>
+		<include name="${mac.dmg}"/>
+		<include name="${mac.zip}"/>
+		<include name="${win.zip}"/>
+		<include name="${other.zip}"/>
+	</fileset>
+
+	<target name="ftp" description="Deploy All To FTP Location" depends="release" if="upload.ftp">
 		<ftp server="${ftp.server}"
 			port="${ftp.port}"
 			remotedir="${ftp.dir}"
 			userid="${ftp.username}"
 			password="${ftp.password}">
-			<fileset dir=".">
-				<include name="${atomfile}"/>
-			</fileset>
+			<fileset refid="uploadfiles"/>
 		</ftp>
 	</target>
 
-	<target name="ftp.source" description="Deploy Source File To FTP" if="ftp.dosource">
-		<ftp server="${ftp.server}"
-			port="${ftp.port}"
-			remotedir="${ftp.dir}"
-			userid="${ftp.username}"
-			password="${ftp.password}">
-			<fileset dir="${dist}">
-				<include name="${source.zip}"/>
-			</fileset>
-		</ftp>
-	</target>
-
-	<target name="ftp" description="Deploy All To FTP Location" depends="release,ftp.autoupdate,ftp.source">
-		<ftp server="${ftp.server}"
-			port="${ftp.port}"
-			remotedir="${ftp.dir}"
-			userid="${ftp.username}"
-			password="${ftp.password}">
-			<fileset dir="${dist}">
-				<include name="${mac.dmg}"/>
-				<include name="${mac.zip}"/>
-				<include name="${win.zip}"/>
-				<include name="${other.zip}"/>
-			</fileset>
-		</ftp>
-	</target>
-
-	<target name="sourceforge" description="Deploy All To Sourceforge" depends="release">
+	<target name="sourceforge" description="Deploy All To Sourceforge" depends="release" if="upload.sourceforge">
 		<tstamp>
 			<format property="sourceforge.date" pattern="d/M/yyyy"/>
 		</tstamp>
@@ -499,7 +620,7 @@
 		</sfpublish>
 	</target>
 	
-	<target name="google.autoupdate" description="Deploy Autoupdate File To Google" if="google.autoupdate" depends="autoupdate">
+	<target name="google.autoupdate" description="Deploy Autoupdate File To Google" depends="autoupdate" if="google.autoupdate">
 		<gcupload
 			username="${google.username}"
 			password="${google.password}"
@@ -510,7 +631,7 @@
 			labels="${name}"/>
 	</target>
 	
-	<target name="google" description="Deploy All To GoogleCode" depends="release,google.autoupdate">
+	<target name="google" description="Deploy All To GoogleCode" depends="release,google.autoupdate" if="upload.google">
 		<gcupload
 			username="${google.username}"
 			password="${google.password}"
@@ -545,7 +666,28 @@
 			labels="Featured, OpSys-Windows, Type-Executable, ${name}"/>
 	</target>
 
-	<target name="deploy" description="Deploy to sourceforge/googlecode/ftp" depends="sourceforge,google,ftp">
+	<target name="github" description="Deploy All To GitHub" depends="release" if="upload.github">
+		<github.fullrelease
+			repouser="${github.repouser}"
+			repo="${github.repo}"
+			tokenuser="${github.tokenuser}"
+			token="${github.token}"
+			tag="${new.version}">
+			<fileset refid="uploadfiles"/>
+		</github.fullrelease>
+	</target>
+
+	<target name="s3" if="upload.s3">
+		<s3upload verbose="true"
+			accessId="${aws.key}"
+			secretKey="${aws.secret}"
+			bucket="${aws.s3}"
+			publicRead="true">
+			<fileset refid="uploadfiles"/>
+		</s3upload>
+	</target>
+
+	<target name="deploy" description="Deploy to sourceforge/googlecode/ftp/github/s3" depends="sourceforge,google,ftp,github,s3">
 		<!-- At the moment deploy requires nothing else -->
 	</target>
 

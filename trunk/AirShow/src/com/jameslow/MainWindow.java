@@ -7,11 +7,11 @@ public class MainWindow extends AbstractWindow implements WindowListener {
 	protected Action aboutAction, exitAction, prefAction, closeAction;
 	
 	public MainWindow() {
-		this(false);
+		this(true);
 	}
 	public MainWindow(boolean quitonclose) {
 		super();
-		if (Main.OS().addQuit() || quitonclose) {
+		if (Main.OS().addQuit() && quitonclose) {
 			addWindowListener(this);
 		}
 		createActions();

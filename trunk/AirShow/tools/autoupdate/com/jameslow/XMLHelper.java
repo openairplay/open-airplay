@@ -212,6 +212,12 @@ public class XMLHelper {
 		node.createSubNode(namenode).setValue(name);
 		return node;  
 	}
+	public XMLHelper getNameNode() {
+		return getSubNode(NAME);
+	}
+	public String getNameValue() {
+		return getNameNode().getValue();
+	}
 	public XMLHelper createSubNode(String subnode) {
 		int pos = subnode.lastIndexOf(DELIM);
 		if (pos >= 0) {
