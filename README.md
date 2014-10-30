@@ -20,6 +20,7 @@ java -jar airplay.jar -h hostname[:port] [-a password] -d
 *Servers (Recievers)*
 =====================
 | Name | Description | Open Source |
+| ---- | ----------- | ----------- |
 | [AirServer](http://www.airserverapp.com/) | The best app for turning your Mac into an AirPlay screen | - |
 | [Reflection](http://www.reflectionapp.com/) | Turn your Mac or PC into an AirPlay screen | - |
 | [Banana TV](http://bananatv.net/) | Another app to turn your Mac into and AirPlay screen | - |
@@ -31,6 +32,7 @@ java -jar airplay.jar -h hostname[:port] [-a password] -d
 *Clients (Senders)*
 ===================
 | Name | Description | Open Source |
+| ---- | ----------- | ----------- |
 | [Beamer](http://beamer-app.com/?mid=5391876) | Send any video to an AppleTV | - |
 | [AirParrot](http://www.airparrot.com/) | Send the screen of your Mac to an AppleTV (AirPlay Mirroring) | - |
 | [Erica's Air Play Utilities](http://ericasadun.com/ftp/AirPlay/) | A collection of Mac utilities for streaming video and photos | - |
