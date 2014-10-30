@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="AirPlay" default="jar" basedir=".">
+	<property name="props" location="build.properties"/>
+	<property file="${props}"/>
 	<property file="secret.properties"/>
 	<property name="bin" location="bin"/>
 	<property name="build" location="build"/>
 	<property name="src" location="src"/>
 	<property name="lib" location="lib"/>
+	<property name="tools" location="tools"/>
+	<property name="github" location="${tools}/github"/>
 	<property name="jar" location="${build}/airplay.jar"/>
 	
 	<fileset id="lib.jars" dir="${lib}">
@@ -13,6 +17,20 @@
 	<path id="lib.path">
 		<fileset refid="lib.jars"/>
 	</path>
+	
+	<fileset id="github-anttasks.jars" dir="${github}/lib">
+		<include name="**/*.jar"/>
+	</fileset>
+	<path id="github-anttasks.classpath">
+		<fileset refid="github-anttasks.jars"/>
+		<pathelement location="."/>
+		<fileset dir="${github}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	<taskdef name="github.createrelease" classname="com.github.api.CreateRelease" classpathref="github-anttasks.classpath" loaderref="github-anttasks.classpath.loader" />
+	<taskdef name="github.uploadasset" classname="com.github.api.UploadAsset" classpathref="github-anttasks.classpath" loaderref="github-anttasks.classpath.loader" />
+	<taskdef name="github.fullrelease" classname="com.github.api.FullRelease" classpathref="github-anttasks.classpath" loaderref="github-anttasks.classpath.loader" />
 	
 	<target name="prepare" description="Create build dirs">
 		<mkdir dir="${bin}"/>
@@ -44,10 +62,42 @@
 	</target>
 	
 	<target name="airshow" depends="jar" description="Copy jar to AirShow">
-		<copy file="${jar}" todir="../AirShow/lib"/>
+		<copy file="${jar}" todir="../../airshow/lib"/>
 	</target>
 	
 	<target name="copy" depends="jar" description="Copy jar to copy.location">
 		<copy file="${jar}" todir="${copy.location}"/>
+	</target>
+	
+	<target name="version.input">
+		<input
+			message="Please input a new version. Current version ${build.version}"
+			addproperty="new.version"
+		/>
+		<propertyfile file="${props}">
+			<entry key="build.version" value="${new.version}"/>
+		</propertyfile>
+		<condition property="version.default">
+			<equals arg1="${new.doversion}" arg2=""/>
+		</condition>
+	</target>
+	<target name="version.default">
+		<property name="new.version" value="${build.version}"/>
+	</target>
+	<target name="version" depends="version.input,version.default" description="Prompt user to enter new version">
+		<!-- At the moment version requires nothing else -->
+	</target>
+	
+	<target name="github" description="Deploy All To GitHub" depends="jar,version">
+		<github.fullrelease
+			repouser="${github.repouser}"
+			repo="${github.repo}"
+			tokenuser="${github.tokenuser}"
+			token="${github.token}"
+			tag="${new.version}">
+			<fileset dir="${build}" casesensitive="yes">
+				<include name="airplay.jar"/>
+			</fileset>
+		</github.fullrelease>
 	</target>
 </project>
