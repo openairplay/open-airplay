@@ -28,6 +28,7 @@ java -jar airplay.jar -h hostname[:port] [-a password] -d
 | [AirMac](http://code.google.com/p/airmac/) | Turns you Macintosh into an Airplay receiver (Objective C) | ✔ |
 | [Airstream Media Player](http://code.google.com/p/airstream-media-player/) | C# based AirPlay screen for windows and AirPlay server source code | ✔ |
 | [Play2Wifi](http://code.google.com/p/play2wifi/) | An AirPlay server written in Python | ✔ | 
+| [Totem Plugin AirPlay](https://github.com/dveeden/totem-plugin-airplay) | Plugin enabling AirPlay video playback in the Totem media player (Python) | ✔ |
 
 *Clients (Senders)*
 ===================
@@ -42,7 +43,6 @@ java -jar airplay.jar -h hostname[:port] [-a password] -d
 | [elcuervo/airplay](https://github.com/elcuervo/airplay) | Airplay bindings to Ruby | ✔ |
 | [xmms2-plugin-airplay](http://packages.debian.org/search?keywords=airplay) | Debian AirPlay library | ✔ |
 | [AirPlay NMW](http://code.google.com/p/airplay-nmt/) | AirPlay plugin for Network Media Tank written in C | ✔ |
-| [Totem Plugin AirPlay](http://cgit.sukimashita.com/totem-plugin-airplay.git/) | Plugin enabling AirPlay video playback in the Totem media player (Python) | ✔ |
 
 Links
 =====
