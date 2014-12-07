@@ -22,12 +22,12 @@ java -jar airplay.jar -h hostname[:port] [-a password] -d
 | Name | Description | Open Source |
 | ---- | ----------- | ----------- |
 | [AirServer](http://www.airserverapp.com/) | The best app for turning your Mac into an AirPlay screen | - |
-| [Reflection](http://www.reflectionapp.com/) | Turn your Mac or PC into an AirPlay screen | - |
+| [Reflector](http://www.airsquirrels.com/reflector/) | Turn your Mac or PC into an AirPlay screen | - |
 | [Banana TV](http://bananatv.net/) | Another app to turn your Mac into and AirPlay screen | - |
 | [Casual Share](http://sourceforge.net/projects/casualshare/) | Mac AirPlay receiever | ✔ |
 | [AirMac](http://code.google.com/p/airmac/) | Turns you Macintosh into an Airplay receiver (Objective C) | ✔ |
 | [Airstream Media Player](http://code.google.com/p/airstream-media-player/) | C# based AirPlay screen for windows and AirPlay server source code | ✔ |
-| [Play2Wifi](http://code.google.com/p/play2wifi/) | An AirPlay server written in Python | ✔ | 
+| [Play2Wifi](http://code.google.com/p/play2wifi/) | An AirPlay server written in Python | ✔ |
 | [Totem Plugin AirPlay](https://github.com/dveeden/totem-plugin-airplay) | Plugin enabling AirPlay video playback in the Totem media player (Python) | ✔ |
 
 *Clients (Senders)*
