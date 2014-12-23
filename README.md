@@ -5,16 +5,21 @@ A collection of libraries for Apple's AirPlay protocol. The Java library also re
 
 Examples
 ========
-The library can be used by another application, but it can also be used for some basic tasks from the command line:
+The library can be used by another application, but it can also be used for some basic tasks from the command line or directly (by double clicking):
 Send a photo:
 ```
 php airplay.php -h hostname[:port] -p file
 java -jar airplay.jar -h hostname[:port] [-a password] -p file
 ```
-Steam desktop:
+Stream desktop:
 ```
 php airplay.php -h hostname[:port] -d (mac only)
 java -jar airplay.jar -h hostname[:port] [-a password] -d
+```
+
+Stream desktop - GUI dialog for selecting available apple tvs (bonjour discovery) and resolution:
+```
+java -jar airplay.jar
 ```
 
 *Servers (Recievers)*

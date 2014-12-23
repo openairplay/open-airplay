@@ -6,9 +6,11 @@ import java.io.*;
 import java.net.*;
 import java.security.*;
 import java.util.*;
+
 import javax.imageio.*;
 import javax.jmdns.*;
 import javax.swing.*;
+
 import jargs.gnu.*;
 
 public class AirPlay {
@@ -277,7 +279,7 @@ public class AirPlay {
 		Dimension dim = tk.getScreenSize();
 		Rectangle rect = new Rectangle(dim);
 		Robot robot = new Robot();
-		BufferedImage image = robot.createScreenCapture(rect);
+		BufferedImage image = robot.createScreenCapture(rect);		
 		return image;
 	}
 	
@@ -298,7 +300,8 @@ public class AirPlay {
 			while (!Thread.interrupted()) {
 				try {
 					if (image == null) {
-						airplay.photoRawCompress(AirPlay.captureScreen(),NONE);
+						BufferedImage frame = airplay.scaleImage(AirPlay.captureScreen());
+						airplay.photoRawCompress(frame, NONE);
 					} else {
 						airplay.photoRaw(image,NONE);
 						Thread.sleep(Math.round(0.9*timeout));
@@ -383,14 +386,64 @@ public class AirPlay {
 		}
 		return results;
 	}
-	public static Service[] search() throws IOException {
-		return search(6000);
+	public static java.util.List<Service> search() throws IOException {
+		return search(1000);
 	}
-	public static Service[] search(int timeout) throws IOException {
-		final JmDNS jmdns = JmDNS.create();
-		Service[] results = formatSearch(jmdns.list(DNSSD_TYPE, timeout));
-		jmdns.close();
-		return results;
+	
+	/**
+	 * List all valid inet addresses of this machine
+	 * will include IPv4 and IPv6 addresses
+	 * @return list of inetaddresses
+	 */
+	public static java.util.List<InetAddress> listNetworkAddresses(){
+		ArrayList<InetAddress> validAddresses = new ArrayList<InetAddress>();
+		
+		Enumeration<NetworkInterface> netInter;
+		try {
+			netInter = NetworkInterface.getNetworkInterfaces();
+
+			while (netInter.hasMoreElements()) {
+				NetworkInterface ni = netInter.nextElement();
+				
+					for (InetAddress iaddress : Collections.list(ni
+							.getInetAddresses())) {
+						if(iaddress.isLoopbackAddress()){
+							continue;
+						}						
+						validAddresses.add(iaddress);
+					}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return validAddresses;
+	}
+		
+	
+	/**
+	 * Search for existing apple tv services on all network interfaces
+	 * @param timeout for each interface query
+	 * @return list of available services
+	 * @throws IOException
+	 */
+	public static java.util.List<Service> search(int timeout) throws IOException {
+		java.util.List<InetAddress> networkAddresses = listNetworkAddresses();
+		
+		java.util.List<Service> availableServices = new ArrayList<AirPlay.Service>();
+		
+		//iterate over all existing addresses and search for apple tv devices
+		for(InetAddress address:networkAddresses){
+			final JmDNS jmdns = JmDNS.create(address);
+			Service[] tmpResults = formatSearch(jmdns.list(DNSSD_TYPE, timeout));
+			for(Service service:tmpResults){
+				if(!availableServices.contains(service)){
+					availableServices.add(service);
+				}
+			}			
+			jmdns.close();
+		}		
+		
+		return availableServices;
 	}
 	public static AirPlay searchDialog(Window parent) throws IOException {
 		return searchDialog(parent, 6000);
@@ -402,13 +455,14 @@ public class AirPlay {
 		search.setLocationRelativeTo(parent);
 		search.toFront();
 		search.setVisible(true);
-		AirPlay.Service[] services = AirPlay.search();
+		java.util.List<AirPlay.Service> services = AirPlay.search();
 		search.setVisible(false);
-		if (services.length > 0) {
+		if (!services.isEmpty()) {
 			//Choose AppleTV
-			String[] choices = new String[services.length];
-			for (int i = 0; i < services.length; i++) {
-				choices[i] = services[i].name + " (" + services[i].hostname + ")"; 
+			String[] choices = new String[services.size()];
+			for (int i = 0; i < services.size(); i++) {
+				Service service = services.get(i);
+				choices[i] = service.name + " (" + service.hostname + ")"; 
 			}
 			String input = (String) JOptionPane.showInputDialog(parent,"","Select AppleTV",JOptionPane.PLAIN_MESSAGE, null,choices,choices[0]);
 			if (input != null) {
@@ -419,7 +473,7 @@ public class AirPlay {
 						break;
 					}
 				}
-				AirPlay airplay = new AirPlay(services[index]);
+				AirPlay airplay = new AirPlay(services.get(index));
 				airplay.setAuth(new AuthDialog(parent));
 				return airplay;
 			}
@@ -428,9 +482,31 @@ public class AirPlay {
 		throw new IOException("No AppleTVs Found");
 	}
 	
+	/**
+	 * Display a dialog for selecting apple tv's resolution
+	 * TODO future improvement would be reading the resolution automatically from the apple tv. I guess this is possible somehow
+	 * @param parent (a parent window, can be null)
+	 * @param airplay the airplay instance of which you want to adjust the resolution
+	 */
+	public static void selectResolutionDialog(Window parent, AirPlay airplay){
+		String[] choices = new String[]{
+				"Full HD  - 1080p - 1920x1080",
+				"HD Ready - 720p -1280 × 720"
+				};
+
+		String input = (String) JOptionPane.showInputDialog(parent, "", "Select AppleTV Resolution",JOptionPane.PLAIN_MESSAGE, null, choices, choices[0]);
+		if (input != null) {
+			if(input.equals(choices[0])){
+				airplay.setScreenSize(1920, 1080);
+			}else if(input.equals(choices[1])){
+				airplay.setScreenSize(1280, 720);
+			}
+		}
+	}
+	
 	// Command line functions
 	public static void usage() {
-		System.out.println("commands: -s {stop} | -p file {photo} | -d {desktop}");
+		System.out.println("commands: -s {stop} | -p file {photo} | -d {desktop} | -?");
 		System.out.println("java -jar airplay.jar -h hostname[:port] [-a password] command");
 	}
 	public static String waitforuser() {
@@ -455,11 +531,19 @@ public class AirPlay {
 			CmdLineParser.Option photoopt = cmd.addStringOption('p',"photo");
 			CmdLineParser.Option desktopopt = cmd.addBooleanOption('d',"desktop");
 			CmdLineParser.Option passopt = cmd.addStringOption('a',"password");
+			CmdLineParser.Option helpopt = cmd.addBooleanOption('?',"help");
 			cmd.parse(args);
+			
 			String hostname = (String) cmd.getOptionValue(hostopt);
 			
-			if (hostname == null) {
+			Boolean showHelp = (Boolean) cmd.getOptionValue(helpopt);
+			
+			if(null != showHelp && showHelp ){
 				usage();
+			}else if (hostname == null) { //show select dialog if no host address is given
+				AirPlay airplay = searchDialog(null);
+				selectResolutionDialog(null, airplay);
+				airplay.desktop();
 			} else {
 				AirPlay airplay;
 				String[] hostport = hostname.split(":",2);
