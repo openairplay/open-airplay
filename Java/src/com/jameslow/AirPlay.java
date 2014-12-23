@@ -478,8 +478,10 @@ public class AirPlay {
 				return airplay;
 			}
 			return null;
+		}else{
+			JOptionPane.showMessageDialog(parent, "No AppleTVs found","Error", JOptionPane.ERROR_MESSAGE);
+			return null;
 		}
-		throw new IOException("No AppleTVs Found");
 	}
 	
 	/**
@@ -542,8 +544,10 @@ public class AirPlay {
 				usage();
 			}else if (hostname == null) { //show select dialog if no host address is given
 				AirPlay airplay = searchDialog(null);
-				selectResolutionDialog(null, airplay);
-				airplay.desktop();
+				if(null != airplay){
+					selectResolutionDialog(null, airplay);
+					airplay.desktop();
+				}
 			} else {
 				AirPlay airplay;
 				String[] hostport = hostname.split(":",2);
