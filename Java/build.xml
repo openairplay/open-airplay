@@ -53,6 +53,16 @@
 			</manifest>
 		</jar>
 	</target>
+
+	<target name="jarbundle" depends="build" description="Create jar">
+		<jar jarfile="${jar}">
+			<fileset dir="${bin}" includes="**/*.class"/>
+			<manifest>
+				<attribute name="Main-Class" value="com.jameslow.AirPlay"/>
+			</manifest>
+			<zipgroupfileset dir="${lib}" includes="**/*.jar"/>
+		</jar>
+	</target>
 	
 	<target name="run" depends="jar" description="Run jar">
 		<java jar="${jar}"
