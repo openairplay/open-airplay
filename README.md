@@ -1,7 +1,7 @@
 open-airplay
 ============
 
-A collection of libraries for Apple's AirPlay protocol. The Java library also requires [http://jmdns.sourceforge.net/ JMDNS] if you want to support searching/bonjour auto discovery.
+A collection of libraries for Apple's AirPlay protocol. The Java library also requires [JMDNS](http://jmdns.sourceforge.net/) if you want to support searching/bonjour auto discovery.
 
 Examples
 ========
