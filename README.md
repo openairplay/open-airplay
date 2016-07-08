@@ -48,7 +48,7 @@ java -jar airplay.jar
 | [elcuervo/airplay](https://github.com/elcuervo/airplay) | Airplay bindings to Ruby | ✔ |
 | [xmms2-plugin-airplay](http://packages.debian.org/search?keywords=airplay) | Debian AirPlay library | ✔ |
 | [AirPlay NMW](http://code.google.com/p/airplay-nmt/) | AirPlay plugin for Network Media Tank written in C | ✔ |
-| [AirMyPC](https://www.airmypc.com/) | AirMyPC Windows AirPlay mirroring client | - |
+| [AirMyPC](http://www.airmypc.com/) | AirMyPC Windows AirPlay mirroring client | - |
 
 Links
 =====
