@@ -1,7 +1,7 @@
 open-airplay
 ============
 
-A collection of libraries for Apple's AirPlay protocol. The Java library also requires [http://jmdns.sourceforge.net/ JMDNS] if you want to support searching/bonjour auto discovery.
+A collection of libraries for Apple's AirPlay protocol. The Java library also requires [JMDNS](http://jmdns.sourceforge.net/) if you want to support searching/bonjour auto discovery.
 
 Examples
 ========
@@ -24,16 +24,17 @@ java -jar airplay.jar
 
 *Servers (Recievers)*
 =====================
-| Name | Description | Open Source |
-| ---- | ----------- | ----------- |
-| [AirServer](http://www.airserverapp.com/) | The best app for turning your Mac into an AirPlay screen | - |
-| [Reflector](http://www.airsquirrels.com/reflector/) | Turn your Mac or PC into an AirPlay screen | - |
-| [Banana TV](http://bananatv.net/) | Another app to turn your Mac into and AirPlay screen | - |
-| [Casual Share](http://sourceforge.net/projects/casualshare/) | Mac AirPlay receiever | ✔ |
-| [AirMac](http://code.google.com/p/airmac/) | Turns you Macintosh into an Airplay receiver (Objective C) | ✔ |
-| [Airstream Media Player](http://code.google.com/p/airstream-media-player/) | C# based AirPlay screen for windows and AirPlay server source code | ✔ |
-| [Play2Wifi](http://code.google.com/p/play2wifi/) | An AirPlay server written in Python | ✔ |
-| [Totem Plugin AirPlay](https://github.com/dveeden/totem-plugin-airplay) | Plugin enabling AirPlay video playback in the Totem media player (Python) | ✔ |
+| Name | Description | Open Source | Mirroring |
+| ---- | ----------- | ----------- | --------- |
+| [AirServer](http://www.airserverapp.com/) | The best app for turning your Mac into an AirPlay screen | - | ✔ |
+| [Reflector](http://www.airsquirrels.com/reflector/) | Turn your Mac or PC into an AirPlay screen | - | ✔ |
+| [Banana TV](http://bananatv.net/) | Another app to turn your Mac into and AirPlay screen | - | - |
+| [Casual Share](http://sourceforge.net/projects/casualshare/) | Mac AirPlay receiever | ✔ | - |
+| [AirMac](http://code.google.com/p/airmac/) | Turns you Macintosh into an Airplay receiver (Objective C) | ✔ | - |
+| [Airstream Media Player](http://code.google.com/p/airstream-media-player/) | C# based AirPlay screen for windows and AirPlay server source code | ✔ | - |
+| [Play2Wifi](http://code.google.com/p/play2wifi/) | An AirPlay server written in Python | ✔ | - |
+| [Totem Plugin AirPlay](https://github.com/dveeden/totem-plugin-airplay) | Plugin enabling AirPlay video playback in the Totem media player (Python) | ✔ | - |
+| [Slave in the Magic Mirror](https://github.com/espes/Slave-in-the-Magic-Mirror) | Open source implementation of AirPlay Mirroring. | ✔ | ✔ |
 
 *Clients (Senders)*
 ===================
