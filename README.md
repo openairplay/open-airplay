@@ -22,7 +22,7 @@ Stream desktop - GUI dialog for selecting available apple tvs (bonjour discovery
 java -jar airplay.jar
 ```
 
-*Servers (Recievers)*
+*Servers (Receivers)*
 =====================
 | Name | Description | Open Source | Mirroring |
 | ---- | ----------- | ----------- | --------- |
