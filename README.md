@@ -18,8 +18,12 @@ java -jar airplay.jar -h hostname[:port] [-a password] -d
 ```
 
 Stream desktop - GUI dialog for selecting available apple tvs (bonjour discovery) and resolution:
+
+Download supplementary library jmdns.jar (stored in folder Java/lib)
+
+Execute from folder with downloaded jars by 
 ```
-java -jar airplay.jar
+java -cp "airplay.jar:jmdns.jar" com.jameslow.AirPlay
 ```
 
 *Servers (Receivers)*
