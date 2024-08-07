@@ -29,6 +29,7 @@ java -jar airplay.jar
 | [AirServer](http://www.airserverapp.com/) | The best app for turning your Mac into an AirPlay screen | - | ✔ |
 | [Reflector](http://www.airsquirrels.com/reflector/) | Turn your Mac or PC into an AirPlay screen | - | ✔ |
 | [Banana TV](http://bananatv.net/) | Another app to turn your Mac into and AirPlay screen | - | - |
+| [Elmedia Player](https://mac.eltima.com/elmedia-player-airplay.html) | Mac AirPlay Sender and AirPlay Receiver | - | - |
 | [Casual Share](http://sourceforge.net/projects/casualshare/) | Mac AirPlay receiever | ✔ | - |
 | [AirMac](http://code.google.com/p/airmac/) | Turns you Macintosh into an Airplay receiver (Objective C) | ✔ | - |
 | [Airstream Media Player](http://code.google.com/p/airstream-media-player/) | C# based AirPlay screen for windows and AirPlay server source code | ✔ | - |
