@@ -378,13 +378,15 @@ public class AirPlay {
 		}
 	}
 	protected static Service[] formatSearch(ServiceInfo[] services) throws IOException {
-		Service[] results = new Service[services.length];
+		ArrayList<Service> results = new ArrayList<Service>(services.length);
 		for (int i = 0; i < services.length; i++) {
 			ServiceInfo service = services[i];
 			Inet4Address[] addresses = service.getInet4Addresses();
-			results[i] = new Service(addresses[0].getHostAddress(), service.getPort(), service.getName());
+			if(addresses != null && addresses.length > 0) {
+				results.add(new Service(addresses[0].getHostAddress(), service.getPort(), service.getName()));
+			}
 		}
-		return results;
+		return results.toArray(new Service[results.size()]);
 	}
 	public static java.util.List<Service> search() throws IOException {
 		return search(1000);
