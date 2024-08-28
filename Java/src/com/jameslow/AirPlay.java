@@ -378,11 +378,22 @@ public class AirPlay {
 		}
 	}
 	protected static Service[] formatSearch(ServiceInfo[] services) throws IOException {
-		Service[] results = new Service[services.length];
+    int k = 0;
 		for (int i = 0; i < services.length; i++) {
 			ServiceInfo service = services[i];
 			Inet4Address[] addresses = service.getInet4Addresses();
-			results[i] = new Service(addresses[0].getHostAddress(), service.getPort(), service.getName());
+      if(addresses.length > 0) {
+        k++;
+      }
+    }
+		Service[] results = new Service[k];
+    int n = 0;
+		for (int i = 0; i < k; i++) {
+			ServiceInfo service = services[i];
+			Inet4Address[] addresses = service.getInet4Addresses();
+      if(addresses.length > 0) {
+        results[n++] = new Service(addresses[0].getHostAddress(), service.getPort(), service.getName());
+      }
 		}
 		return results;
 	}
@@ -458,11 +469,21 @@ public class AirPlay {
 		java.util.List<AirPlay.Service> services = AirPlay.search();
 		search.setVisible(false);
 		if (!services.isEmpty()) {
+      int k = 0;
 			//Choose AppleTV
-			String[] choices = new String[services.size()];
 			for (int i = 0; i < services.size(); i++) {
 				Service service = services.get(i);
-				choices[i] = service.name + " (" + service.hostname + ")"; 
+        if(service != null) {
+          k++;
+        }
+			}
+      int n = 0;
+			String[] choices = new String[k];
+			for (int i = 0; i < k; i++) {
+				Service service = services.get(i);
+        if(service != null) {
+          choices[n++] = service.name + " (" + service.hostname + ")"; 
+        }
 			}
 			String input = (String) JOptionPane.showInputDialog(parent,"","Select AppleTV",JOptionPane.PLAIN_MESSAGE, null,choices,choices[0]);
 			if (input != null) {

@@ -38,8 +38,8 @@
 	</target>
 	
 	<target name="build" depends="prepare" description="Compile">
-		<javac srcdir="${src}" destdir="${bin}"
-			source="1.5" target="1.5"
+		<javac srcdir="${src}" destdir="${bin}" debug="true" debuglevel="lines,vars,source"
+			source="1.6" target="1.6"
 			failonerror="true"
 			includes="**/*.java"
 			classpathref="lib.path"/>
