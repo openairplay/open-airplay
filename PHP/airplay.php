@@ -122,7 +122,7 @@ if (PHP_SAPI === 'cli') {
 		usage();
 		exit(1);
 	} else {
-		$host =  split(':',$host);
+		$host = explode(':',$host);
 		if (count($host) > 1) {
 			$airplay = new AirPlay($host[0],$host[1]);
 		} else {
