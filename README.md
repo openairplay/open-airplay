@@ -6,6 +6,11 @@ A collection of libraries for Apple's AirPlay protocol. The Java library also re
 Examples
 ========
 The library can be used by another application, but it can also be used for some basic tasks from the command line or directly (by double clicking):
+
+Build:
+```
+cd Java && ant
+```
 Send a photo:
 ```
 php airplay.php -h hostname[:port] -p file
