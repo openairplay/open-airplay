@@ -533,6 +533,8 @@ public class AirPlay {
 			CmdLineParser.Option photoopt = cmd.addStringOption('p',"photo");
 			CmdLineParser.Option desktopopt = cmd.addBooleanOption('d',"desktop");
 			CmdLineParser.Option passopt = cmd.addStringOption('a',"password");
+			CmdLineParser.Option widthopt = cmd.addIntegerOption('x',"width");
+			CmdLineParser.Option heightopt = cmd.addIntegerOption('y',"height");
 			CmdLineParser.Option helpopt = cmd.addBooleanOption('?',"help");
 			cmd.parse(args);
 			
@@ -555,6 +557,11 @@ public class AirPlay {
 					airplay = new AirPlay(hostport[0],Integer.parseInt(hostport[1]));
 				} else {
 					airplay = new AirPlay(hostport[0]);
+				}
+				int width = (Integer) cmd.getOptionValue(widthopt);
+				int height = (Integer) cmd.getOptionValue(heightopt);
+				if (width != 0 && height != 0) {
+					airplay.setScreenSize(width, height);
 				}
 				airplay.setAuth(new AuthConsole());
 				String password = (String) cmd.getOptionValue(passopt);
