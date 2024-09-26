@@ -44,6 +44,7 @@ java -cp "airplay.jar:jmdns.jar" com.jameslow.AirPlay
 | [Play2Wifi](http://code.google.com/p/play2wifi/) | An AirPlay server written in Python | ✔ | - |
 | [Totem Plugin AirPlay](https://github.com/dveeden/totem-plugin-airplay) | Plugin enabling AirPlay video playback in the Totem media player (Python) | ✔ | - |
 | [Slave in the Magic Mirror](https://github.com/espes/Slave-in-the-Magic-Mirror) | Open source implementation of AirPlay Mirroring. | ✔ | ✔ |
+| [PyOpenAirMirror](https://github.com/tzwenn/PyOpenAirMirror) | An open source AirPlay mirroring server in Python. | ✔ | ✔ |
 
 *Clients (Senders)*
 ===================
