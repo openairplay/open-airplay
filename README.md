@@ -1,7 +1,7 @@
 open-airplay
 ============
 
-A collection of libraries for Apple's AirPlay protocol. The Java library also requires [JMDNS](http://jmdns.sourceforge.net/) if you want to support searching/bonjour auto discovery.
+A collection of libraries for Apple's AirPlay protocol. The Java library also requires [JmDNS](https://github.com/jmdns/jmdns) if you want to support searching/bonjour auto discovery.
 
 Examples
 ========
@@ -33,35 +33,39 @@ java -cp "airplay.jar:jmdns.jar" com.jameslow.AirPlay
 
 *Servers (Receivers)*
 =====================
+These third-party projects are a mix of current public options and historical references. Some are archived or unmaintained.
+
 | Name | Description | Open Source | Mirroring |
 | ---- | ----------- | ----------- | --------- |
-| [AirServer](http://www.airserverapp.com/) | The best app for turning your Mac into an AirPlay screen | - | ✔ |
-| [Reflector](http://www.airsquirrels.com/reflector/) | Turn your Mac or PC into an AirPlay screen | - | ✔ |
-| [Banana TV](http://bananatv.net/) | Another app to turn your Mac into and AirPlay screen | - | - |
-| [Casual Share](http://sourceforge.net/projects/casualshare/) | Mac AirPlay receiever | ✔ | - |
-| [AirMac](http://code.google.com/p/airmac/) | Turns you Macintosh into an Airplay receiver (Objective C) | ✔ | - |
-| [Airstream Media Player](http://code.google.com/p/airstream-media-player/) | C# based AirPlay screen for windows and AirPlay server source code | ✔ | - |
-| [Play2Wifi](http://code.google.com/p/play2wifi/) | An AirPlay server written in Python | ✔ | - |
-| [Totem Plugin AirPlay](https://github.com/dveeden/totem-plugin-airplay) | Plugin enabling AirPlay video playback in the Totem media player (Python) | ✔ | - |
+| [UxPlay](https://github.com/FDH2/UxPlay) | A maintained open source AirPlay receiver for Linux, macOS, Windows, and BSD systems | ✔ | ✔ |
+| [Shairport Sync](https://github.com/mikebrady/shairport-sync) | A maintained open source AirPlay audio receiver and multi-room player | ✔ | - |
+| [AirServer](https://www.airserver.com/) | The best app for turning your Mac into an AirPlay screen | - | ✔ |
+| [Reflector](https://www.airsquirrels.com/reflector) | Turn your Mac or PC into an AirPlay screen | - | ✔ |
+| [Banana TV (archived)](https://web.archive.org/web/*/http://bananatv.net/) | Another app to turn your Mac into and AirPlay screen | - | - |
+| [Casual Share](https://sourceforge.net/projects/casualshare/) | Mac AirPlay receiver | ✔ | - |
+| [AirMac (archived)](https://code.google.com/archive/p/airmac) | Turns your Macintosh into an AirPlay receiver (Objective C) | ✔ | - |
+| [Airstream Media Player (archived)](https://code.google.com/archive/p/airstream-media-player) | C# based AirPlay screen for Windows and AirPlay server source code | ✔ | - |
+| [Play2Wifi (archived)](https://code.google.com/archive/p/play2wifi) | An AirPlay server written in Python | ✔ | - |
+| [Totem Plugin AirPlay (archived)](https://web.archive.org/web/*/https://github.com/dveeden/totem-plugin-airplay) | Plugin enabling AirPlay video playback in the Totem media player (Python) | ✔ | - |
 | [Slave in the Magic Mirror](https://github.com/espes/Slave-in-the-Magic-Mirror) | Open source implementation of AirPlay Mirroring. | ✔ | ✔ |
 
 *Clients (Senders)*
 ===================
 | Name | Description | Open Source |
 | ---- | ----------- | ----------- |
-| [Beamer](http://beamer-app.com/?mid=5391876) | Send any video to an AppleTV | - |
-| [AirParrot](http://www.airparrot.com/) | Send the screen of your Mac to an AppleTV (AirPlay Mirroring) | - |
-| [Erica's Air Play Utilities](http://ericasadun.com/ftp/AirPlay/) | A collection of Mac utilities for streaming video and photos | - |
-| [doubleTwist AirSync](https://market.android.com/details?id=com.doubleTwist.androidPlayerProKey) | Stream music/videos from your Android phone over AirPlay | - |
-| [AP4J](http://www.ioncannon.net/projects/ap4j-player-java-airplay-player/) | Java AirPlay video client | ✔ |
+| [Beamer](https://softorino.com/beamer) | Send any video to an AppleTV | - |
+| [AirParrot](https://www.airsquirrels.com/airparrot/) | Send the screen of your Mac to an AppleTV (AirPlay Mirroring) | - |
+| [Erica's Air Play Utilities (archived)](https://web.archive.org/web/*/http://ericasadun.com/ftp/AirPlay/) | A collection of Mac utilities for streaming video and photos | - |
+| [doubleTwist AirSync](https://play.google.com/store/apps/details?id=com.doubleTwist.androidPlayerProKey) | Stream music/videos from your Android phone over AirPlay | - |
+| [AP4J (archived)](https://web.archive.org/web/*/http://www.ioncannon.net/projects/ap4j-player-java-airplay-player/) | Java AirPlay video client | ✔ |
 | [PascalWAirplayer](https://github.com/PascalW/Airplayer) | A Python based library | ✔ |
-| [elcuervo/airplay](https://github.com/elcuervo/airplay) | Airplay bindings to Ruby | ✔ |
-| [xmms2-plugin-airplay](http://packages.debian.org/search?keywords=airplay) | Debian AirPlay library | ✔ |
-| [AirPlay NMW](http://code.google.com/p/airplay-nmt/) | AirPlay plugin for Network Media Tank written in C | ✔ |
-| [AirMyPC](http://www.airmypc.com/) | AirMyPC Windows AirPlay mirroring client | - |
+| [elcuervo/airplay](https://github.com/elcuervo/airplay) | AirPlay bindings for Ruby | ✔ |
+| [xmms2-plugin-airplay](https://packages.debian.org/search?keywords=airplay) | Debian AirPlay library | ✔ |
+| [AirPlay NMW (archived)](https://code.google.com/archive/p/airplay-nmt) | AirPlay plugin for Network Media Tank written in C | ✔ |
+| [AirMyPC](https://www.airmypc.com/) | AirMyPC Windows AirPlay mirroring client | - |
 
 Links
 =====
- * [Stream DVDs](http://www.tuaw.com/2010/12/21/dvds-are-playing-back-on-my-apple-tv-and-its-not-really-that/) - Stream DVD's from a Mac using Erica's AirFlick and VLC
- * [Stream Desktop](http://hiddencode.me/blog/2011/07/how-to-stream-mac-desktop-to-apple-tv/) - Stream your Mac's desktop using Erica's AirFlick and VLC (Audio not supported due to limitations in VLC)
- * [lifehacker](http://lifehacker.com/5802958/how-to-make-your-entire-home-airplay+compatible) - Make your entire home AirPlay compatible
+ * [Stream DVDs (archived)](https://web.archive.org/web/*/http://www.tuaw.com/2010/12/21/dvds-are-playing-back-on-my-apple-tv-and-its-not-really-that/) - Stream DVD's from a Mac using Erica's AirFlick and VLC
+ * [Stream Desktop (archived)](https://web.archive.org/web/*/http://www.hiddencode.me/blog/2011/07/how-to-stream-mac-desktop-to-apple-tv/) - Stream your Mac's desktop using Erica's AirFlick and VLC (Audio not supported due to limitations in VLC)
+ * [Lifehacker](https://lifehacker.com/how-to-make-your-entire-home-airplay-compatible-5802958) - Make your entire home AirPlay compatible
